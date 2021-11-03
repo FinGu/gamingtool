@@ -55,14 +55,14 @@ gt_error parse_game(game_config *out, char *data){
 
     in = cJSON_GetObjectItem(handle, "enabled");
 
-    if(cJSON_IsBool(in)){
-        out->wine.enabled = in->valueint;
-    }
+    out->wine.enabled = ((cJSON_IsBool(in)) ? in->valueint : 0);
 
-    in = cJSON_GetObjectItem(handle, "version");
+    if(out->wine.enabled){
+        in = cJSON_GetObjectItem(handle, "version");
 
-    if(cJSON_IsString(in)){
-        out->wine.version = strdup(in->valuestring);
+        if(cJSON_IsString(in)){
+            out->wine.version = strdup(in->valuestring);
+        }    
     }
 
     handle = cJSON_GetObjectItem(config, "scripts");
