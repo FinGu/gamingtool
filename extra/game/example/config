@@ -1,0 +1,13 @@
+{
+ "executable": "/usr/bin/echo",
+ "args": "Hello World",
+ "wine": {
+ "enabled": false,
+ "version": ""
+ },
+ "scripts":{
+ "prelaunch": true, 
+ "postlaunch": true 
+},
+ "log": true
+} 
