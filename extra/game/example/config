@@ -1,6 +1,6 @@
 {
  "executable": "/usr/bin/echo",
- "args": "Hello World",
+ "arguments": "Hello World",
  "wine": {
  "enabled": false,
  "version": ""

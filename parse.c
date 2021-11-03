@@ -45,10 +45,10 @@ gt_error parse_game(game_config *out, char *data){
         out->executable = strdup(handle->valuestring);
     }
 
-    handle = cJSON_GetObjectItem(config, "args");
+    handle = cJSON_GetObjectItem(config, "arguments");
 
     if(cJSON_IsString(handle)){
-        out->args = strdup(handle->valuestring);
+        out->arguments = strdup(handle->valuestring);
     }
 
     handle = cJSON_GetObjectItem(config, "wine");
@@ -63,7 +63,7 @@ gt_error parse_game(game_config *out, char *data){
         if(cJSON_IsString(in)){
             out->wine.version = strdup(in->valuestring);
         }    
-    }
+    } 
 
     handle = cJSON_GetObjectItem(config, "scripts");
 
@@ -93,6 +93,6 @@ gt_error parse_game(game_config *out, char *data){
 void free_game(game_config *to_free){
     free(to_free->name);
     free(to_free->executable);
-    free(to_free->args);
+    free(to_free->arguments);
     free(to_free->wine.version);
 }

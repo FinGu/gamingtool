@@ -1,23 +1,5 @@
 #include "errors.h"
 
-/*
- * config file structure
- * {
- *   executable:"",
- *   args: "",
- *   wine: {
- *      enabled: bool,
- *      version: ""
- *   },
- *   scripts:{
- *      prelaunch: bool,
- *      postlaunch: bool 
- *   }
- *   log: bool
- * } 
- *
- */
-
 struct __game_wine{
     int enabled;
     char *version;
@@ -31,7 +13,7 @@ struct __game_scripts{
 typedef struct {
     char *name; //this var is the name of the game's folder
     char *executable;
-    char *args;
+    char *arguments;
     struct __game_wine wine;
     struct __game_scripts scripts;
     int log; //should be a global config

@@ -70,12 +70,12 @@ gt_error run_game(game_config *cfg, char *game_folder, char *folder){
         return err;
     }
     
-    glen = strlen(cfg->executable) + ((cfg->args) ? strlen(cfg->args) : 0) + 1; //1 for " "
+    glen = strlen(cfg->executable) + ((cfg->arguments) ? strlen(cfg->arguments) : 0) + 1; //1 for " "
 
     gbuf = copycatalloc(glen, cfg->executable, " ");
 
-    if(cfg->args){
-        pstrcat(gbuf, cfg->args);
+    if(cfg->arguments){
+        pstrcat(gbuf, cfg->arguments);
     }
 
     if(cfg->scripts.prelaunch){
