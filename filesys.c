@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <fcntl.h> 
 #include <unistd.h>
 #include <dirent.h>
 
@@ -23,18 +23,21 @@ int can_access(char *file, int folder){
     return 1;
 }
 
-gt_error read_file(int size, char *buf, char *file_location){
+gt_error read_write_file(int mode, size_t size, char *buf, char *file_location){
     gt_error err = ok;
     int i, file;
-    
-    file = open(file_location, O_RDONLY);
 
-    if (file == -1){
+    //O_WRONLY = 1
+    //O_RDONLY = 0 
+
+    file = open(file_location, mode);
+
+    if(file == -1) {
         err = failed_to_open;
         goto out;
     }
 
-    i = read(file, buf, size);
+    i = ((mode) ? write(file, buf, size) : read(file, buf, size));
 
     if(i <= 0){
         err = failed_to_read;
@@ -73,6 +76,18 @@ gt_error print_files_in_folder(char *folder){
     return ok;
 }
 
+gt_error read_write_config(int mode, size_t size, char *buf, char *folder){
+    gt_error err = ok;
+    int nlen = strlen(folder) + 6; //6 for config
+    char *location = copycatalloc(nlen, folder, "config");
+
+    err = read_write_file(mode, size, buf, location);
+
+    free(location);
+
+    return err; 
+}
+
 gt_error get_game_folder(char **out, char *folder, char *game){
     char *cout;
     int nlen = strlen(folder) + 6 + strlen(game); // 6 for game//
@@ -89,21 +104,6 @@ gt_error get_game_folder(char **out, char *folder, char *game){
     *out = cout;
 
     return ok;
-}
-
-gt_error read_game(int size, char *buf, char *game_folder){
-    gt_error err = ok;
-    int nlen = strlen(game_folder) + 6; //6 for config
-    char *location = copycatalloc(nlen, game_folder, "config");
-
-    //if(strcmp(&file[flen-5], ".json") == 0){ //folder is ignored if it contains .json
-    //    return read_file(bufsize, outb, file);
-
-    err = ((can_access(location, 0)) ? read_file(size, buf, location) : failed_to_open);
-
-    free(location);
-
-    return err;
 }
 
 gt_error get_create_folder(char **out){

@@ -6,11 +6,13 @@ typedef enum {
     //file reading starts
     failed_to_open,
     failed_to_read,
+    failed_to_write,
     failed_to_create_dir,
     home_not_found,
     //file reading ends
     //parsing starts
     failed_to_parse,
+    cjson_failure,
     //parsing ends
     //run stats
     couldnt_find_wine,

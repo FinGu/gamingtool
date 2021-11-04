@@ -1,5 +1,6 @@
-#include "parse.h"
+#include "errors.h"
+#include "config.h"
 
-gt_error run(char*, char*); //game, folder
+gt_error run(config* cfg, char*, char*); //game, folder
 
-gt_error run_game(game_config *, char*, char*);
+gt_error run_game(config*, game_config *, char*, char*);
