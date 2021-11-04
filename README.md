@@ -4,7 +4,7 @@ Personal tool that's meant to be used as a helper to play games on linux
 1. meson build
 2. ninja -C build
 
-#Usage:
+# Usage:
 - run <game>
 - list <wine or game>
 
