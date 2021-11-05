@@ -8,6 +8,5 @@
  "scripts":{
  "prelaunch": true, 
  "postlaunch": true 
-},
- "log": true
+}
 } 
