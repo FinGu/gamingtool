@@ -67,8 +67,6 @@ gt_error find_wine(size_t *outlen, char **outstr, size_t foldlen, char *folder, 
 
 gt_error run_game(config* cfg, game_config *gamecfg, size_t game_folder_len, char *game_folder, size_t foldlen, char *folder){
     gt_error err = ok, serr = ok;
-    int slen;
-    char *sbuf;
 
     //TODO: support bash aliases?
     if(!can_access(gamecfg->folder, 1)){ 
