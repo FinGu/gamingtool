@@ -19,6 +19,8 @@ int main(int argc, char **argv){
     string folder, argh;
     config cfg = {0};
 
+    folder = (string){0, NULL};
+
     if(argc < 3){
         usage();
         goto out;
