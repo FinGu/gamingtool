@@ -16,10 +16,8 @@ void usage(void);
 int main(int argc, char **argv){
     gt_error err = ok;
     char *argp;
-    string folder, argh;
+    string folder = {0, NULL}, argh;
     config cfg = {0};
-
-    folder = (string){0, NULL};
 
     if(argc < 3){
         usage();
@@ -57,5 +55,5 @@ int main(int argc, char **argv){
 }
 
 void usage(){
-    puts(PREFIX"available options:\nrun <game>\nlist <wine or games>");
+    puts(PREFIX"available options:\nrun <game>\nlist <wine or game>");
 }
