@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include "errors.h"
 #include "config.h"
 
 void print_error(gt_error error){
@@ -18,7 +17,7 @@ void print_error(gt_error error){
         {cjson_failure, "cJSON failed, report this"},
         {couldnt_find_wine, "Couldn't find the wine version"},
         {couldnt_find_script, "Couldn't find one of the scripts"},
-        {game_not_found, "The game executable couldn't be found"},
+        {game_folder_not_found, "The game folder couldn't be found"}, 
         {failed_to_start, "Failed to start process"}
     };
 

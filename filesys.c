@@ -8,7 +8,6 @@
 #include <dirent.h>
 
 #include "filesys.h"
-#include "config.h"
 #include "utils.h"
 
 int can_access(char *file, int folder){
@@ -76,42 +75,51 @@ gt_error print_files_in_folder(char *folder){
     return ok;
 }
 
-gt_error read_write_config(int mode, size_t size, char *buf, char *folder){
+gt_error read_write_config(int mode, size_t bufsize, char *buf, size_t foldlen, char *folder){ 
     gt_error err = ok;
-    int nlen = strlen(folder) + 6; //6 for config
+    size_t nlen = foldlen + 6; //6 for config
     char *location = copycatalloc(nlen, folder, "config");
 
-    err = read_write_file(mode, size, buf, location);
+    err = read_write_file(mode, bufsize, buf, location);
 
-    free(location);
+    cfree(location);
 
     return err; 
 }
 
-gt_error get_game_folder(char **out, char *folder, char *game){
+gt_error get_game_folder(size_t *outlen, char **outstr, size_t folderlen, char *folder, size_t gamelen, char *game){
+    gt_error err = ok;
     char *cout;
-    int nlen = strlen(folder) + 6 + strlen(game); // 6 for game//
+    size_t nlen = folderlen + 6 + gamelen; // 6 for game//
     
     cout = smalloc(nlen);
 
     sprintf(cout, "%sgame/%s/", folder, game);
 
-    if(!can_access(cout, 1)){
-        free(cout);
-        return failed_to_open;
+    if(!can_access(cout, 1)){ //probably should remove this as read_write_file does this job
+        err = failed_to_open;
+        goto out;
     }
 
-    *out = cout;
+    *outlen = nlen;
+    *outstr = cout;
 
-    return ok;
+    out:
+    if(err){
+        cfree(cout);
+    }
+
+    return err;
 }
 
-gt_error get_create_folder(char **out){
+gt_error get_create_folder(size_t *outlen, char **outstr){
+    gt_error err = ok;
     char *home = getenv("HOME"), *folder, *nfolder;
-    int slen;
+    size_t slen;
 
     if(!home){
-        return home_not_found;
+        err = home_not_found;
+        goto out;
     }
 
     slen = strlen(home) + NSIZE + 3; //+1 for . and +2 for /
@@ -120,29 +128,33 @@ gt_error get_create_folder(char **out){
     
     pstrcat(folder, "/");
 
-    *out = folder; 
+    if(!can_access(folder, 1)){
+        if(mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
+            err = failed_to_create_dir;
+            goto out;
+        }
 
-    if(can_access(folder, 1)){
-        return ok;
+        nfolder = copycatalloc(slen + 4, folder, "game"); // + 4 for the subfolder name
+
+        mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO); //shouldn't fail
+
+        memset(&nfolder[slen], 0, 4); //clears game
+
+        pstrcat(nfolder, "wine");
+
+        mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO);
+
+        cfree(nfolder);
     }
 
-    if(mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
-        free(folder);
-        return failed_to_create_dir;
+    *outstr = folder; 
+    *outlen = slen;
+
+    out:
+    if(err){
+        cfree(folder);
     }
 
-    nfolder = copycatalloc(slen + 4, folder, "game"); // + 4 for the subfolder name
-
-    mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO); //shouldn't fail
-
-    memset(&nfolder[slen], 0, 4); //clears game
-
-    pstrcat(nfolder, "wine");
-
-    mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO);
-
-    free(nfolder);
-
-    return ok;
+    return err;
 }
 

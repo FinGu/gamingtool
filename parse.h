@@ -1,9 +1,8 @@
 #include "config.h"
-#include "errors.h"
 
-gt_error create_config(char **);
+gt_error create_config(size_t*, char**);
 
-gt_error parse_config(config*, char*);
+gt_error parse_config(config*, char*); //no free function needed as this doesnt allocate to the struct
 
 gt_error parse_game_config(game_config*, char*);
 

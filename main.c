@@ -1,35 +1,34 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include <fcntl.h>
 
 #include "parse.h"
 
-#include "errors.h"
+#include "config.h"
 #include "filesys.h"
 #include "run.h"
 #include "list.h"
 #include "utils.h"
 
 void usage(void);
-gt_error get_config(config*, char*);
 
 int main(int argc, char **argv){
     gt_error err = ok;
     char *folder = NULL, *argp, *argh;
     config cfg = {0};
+    size_t foldlen = 0; 
 
     if(argc < 3){
         usage();
         goto out;
     }
 
-    if((err = get_create_folder(&folder))){
+    if((err = get_create_folder(&foldlen, &folder))){
         goto out;
     } 
     
-    if((err = get_config(&cfg, folder))){
+    if((err = get_config(&cfg, foldlen, folder))){
         goto out;
     }
 
@@ -38,15 +37,15 @@ int main(int argc, char **argv){
     argh = argv[2];
 
     if(strcmp(argp, "run") == 0) {
-        err = run(&cfg, folder, argh);
+        err = run(&cfg, foldlen, folder, strlen(argh), argh);
     } else if(strcmp(argp, "list") == 0){
         err = ((strcmp(argh, "wine") == 0 || strcmp(argh, "game") == 0)) ?
-            list(folder, argh) :
+            list(foldlen, folder, argh) :
             failed_to_read;
     }
 
     out:
-    free(folder);
+    cfree(folder);
 
     if(err){
         print_error(err);
@@ -57,30 +56,4 @@ int main(int argc, char **argv){
 
 void usage(){
     puts(PREFIX"available options:\nrun <game>\nlist <wine or games>");
-}
-
-gt_error get_config(config *out, char *folder){
-    gt_error err = ok;
-    int nlen;
-    char buf[BUFSIZE] = {0};
-    char *cfgbuf = NULL;
-
-    if((err = read_write_config(O_RDONLY, BUFSIZE, buf, folder))) {
-        if((err = create_config(&cfgbuf))){
-            goto out;
-        }
-        
-        nlen = 17; 
-
-        if((err = read_write_config(O_CREAT | O_WRONLY | O_TRUNC | S_IRWXU, nlen, cfgbuf, folder))){
-            goto out;
-        }
-    }
-
-    err = parse_config(out, ((cfgbuf) ? cfgbuf : buf));
-    
-    out:
-    free(cfgbuf);
-
-    return err;
 }

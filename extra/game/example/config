@@ -1,5 +1,6 @@
 {
- "executable": "/usr/bin/echo",
+ "folder": "/usr/bin/"
+ "executable": "echo",
  "arguments": "Hello World",
  "wine": {
  "enabled": false,

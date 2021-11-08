@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -9,76 +8,80 @@
 #include "filesys.h"
 #include "parse.h"
 
-gt_error run(config* cfg, char *folder, char *game){
+gt_error find_wine(size_t*, char**, size_t, char*, char*);
+
+gt_error game_process_run(game_config*, size_t, char*, int);
+
+gt_error run(config* cfg, size_t foldlen, char *folder, size_t gamelen, char *game){
     gt_error err = ok;
     game_config gamecfg = {0};
-    char buf[BUFSIZE] = {0}, *game_folder = NULL;
+    char *game_folder = NULL;
+    size_t game_folder_len = 0;
 
-    if((err = get_game_folder(&game_folder, folder, game))){
+    if((err = get_game_config(&gamecfg, &game_folder_len, &game_folder, foldlen, folder, gamelen, game))){
         goto out;
     }
+ 
+    err = run_game(cfg, &gamecfg, game_folder_len, game_folder, foldlen,folder);
 
-    gamecfg.name = strdup(game);
-    
-    if((err = read_write_config(O_RDONLY, BUFSIZE, buf, game_folder))){
-        goto out;
-    }
-
-    if((err = parse_game_config(&gamecfg, buf))){
-        goto out;
-    }
-
-    err = run_game(cfg, &gamecfg, game_folder, folder);
+    cfree(game_folder);
 
     out: 
-    free(game_folder);
     free_game_config(&gamecfg);
 
     return err;
 }
 
-gt_error find_wine(char **out, char *folder, char *wine){
+gt_error find_wine(size_t *outlen, char **outstr, size_t foldlen, char *folder, char *wine){ //we don't have the length of wine
+    gt_error err = ok;
     char *cout;
     int len;
 
     if(!wine) {
-        return couldnt_find_wine;
+        err = couldnt_find_wine;
+        goto out;
     }
 
-    len = strlen(folder) + strlen(wine) + 14; //5 for wine/, 9 for /bin/wine 
+    len = foldlen + strlen(wine) + 14; //5 for wine/, 9 for /bin/wine 
 
     cout = smalloc(len);
 
     sprintf(cout, "%swine/%s/bin/wine", folder, wine);
 
     if(!can_access(cout, 0)){
-        free(cout);
-        return couldnt_find_wine;
+        err = couldnt_find_wine;
+        goto out;
     }
 
-    *out = cout;
+    *outlen = len;
+    *outstr = cout;
+
+    out:
+    if(err){
+        cfree(cout);
+    }
 
     return ok;
 }
 
-gt_error run_game(config* cfg, game_config *gamecfg, char *game_folder, char *folder){
+gt_error run_game(config* cfg, game_config *gamecfg, size_t game_folder_len, char *game_folder, size_t foldlen, char *folder){
     gt_error err = ok, serr = ok;
-    int slen, wlen, glen;
-    char *gbuf, *wbuf, *sbuf, *winepath;
+    int slen;
+    char *sbuf;
 
     //TODO: support bash aliases?
-    if(!gamecfg->executable || !can_access(gamecfg->executable, 0)){ 
-        err = game_not_found;
-        return err;
+    if(!can_access(gamecfg->folder, 1)){ 
+        err = game_folder_not_found;
+        goto out;
     }
     
-    glen = strlen(gamecfg->executable) + ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0) + 1; //1 for " "
+    //glen = strlen(gamecfg->executable) + ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0) + 1; //1 for " "
 
-    gbuf = copycatalloc(glen, gamecfg->executable, " ");
+    //gbuf = copycatalloc(glen, gamecfg->executable, " ");
 
-    if(gamecfg->arguments){
+    /* if(gamecfg->arguments){
         pstrcat(gbuf, gamecfg->arguments);
-    }
+    } */
 
     if(gamecfg->scripts.prelaunch){
         if(cfg->log){
@@ -96,37 +99,18 @@ gt_error run_game(config* cfg, game_config *gamecfg, char *game_folder, char *fo
             print_error(serr);
         } 
 
-        free(sbuf);
+        cfree(sbuf);
     }
 
-    printf(PREFIX"Running game %s\n", gamecfg->name);
+    if(cfg->log){
+        printf(PREFIX"Running game %s\n", gamecfg->name);
 
-    if(gamecfg->wine.enabled){
-        if(cfg->log){
+        if(gamecfg->wine.enabled){
             puts(PREFIX"Wine is enabled");
         }
-
-        if((err = find_wine(&winepath, folder, gamecfg->wine.version))){
-            free(gbuf);
-            return err;
-        }
-
-        wlen = strlen(winepath) + 1 + glen;
-
-        wbuf = copycatalloc(wlen, winepath, " "); //1 for " " 
-
-        pstrcat(wbuf, gbuf);
-        
-        err = prun(wbuf, cfg->log);
-
-        free(winepath);
-
-        free(wbuf);
-    } else {
-        err = prun(gbuf, cfg->log);
     }
-    
-    free(gbuf);
+
+    game_process_run(gamecfg, game_folder_len, game_folder, cfg->log);
 
     if(gamecfg->scripts.postlaunch) {
         if(cfg->log){
@@ -144,8 +128,41 @@ gt_error run_game(config* cfg, game_config *gamecfg, char *game_folder, char *fo
             print_error(serr);
         } 
 
-        free(sbuf);
+        cfree(sbuf);
     }
 
+    out:
+    //cfree(gbuf);
+
     return err;
+}
+
+gt_error game_process_run(game_config *gamecfg, size_t game_folder_len, char *game_folder, int log){
+    gt_error err;
+    size_t wlen = 0, len = strlen(gamecfg->folder) + strlen(gamecfg->executable) + 13; //13 for the full command 
+    char *cmd, *winepath;
+
+    cmd = winepath = NULL;
+
+    len += ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0);
+
+    if(gamecfg->wine.enabled){
+        if((err = find_wine(&wlen, &winepath, game_folder_len, game_folder, gamecfg->wine.version))){
+            goto out;
+        }
+        len += wlen;
+    }
+
+    cmd = smalloc(len);
+
+    sprintf(cmd, "cd \"%s\" && %s ./%s %s", 
+            gamecfg->folder, ((gamecfg->wine.enabled) ? winepath : ""), gamecfg->executable, ((gamecfg->arguments) ? gamecfg->arguments : "")); //more convenient for me
+
+    err = prun(cmd, log);
+
+    out:
+    cfree(winepath);
+    cfree(cmd);
+
+    return err; 
 }

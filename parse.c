@@ -1,7 +1,6 @@
 #include <cjson/cJSON.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include "parse.h"
 #include "utils.h"
@@ -10,14 +9,8 @@
 //to be used somewhere else later
 gt_error create_parser(cJSON **out, char *data){
     cJSON *cout = cJSON_Parse(data);
-    //char *errptr = NULL;
 
     if(!cout){
-        /* errptr = (char*)cJSON_GetErrorPtr();
-
-        if(errptr){
-            printf(PREFIX"%s", errptr);
-        } */
         return failed_to_parse;
     }
 
@@ -26,7 +19,8 @@ gt_error create_parser(cJSON **out, char *data){
     return ok;
 }
 
-gt_error create_config(char **data){
+gt_error create_config(size_t* cfglen, char **data){
+    char *buf;
     cJSON *config = cJSON_CreateObject(), *log;
     gt_error err = ok;
 
@@ -39,11 +33,15 @@ gt_error create_config(char **data){
 
     cJSON_AddItemToObject(config, "log", log);
 
-    *data = cJSON_Print(config);
+    buf = cJSON_Print(config);
 
-    if(!data){
+    if(!buf){
         err = cjson_failure;
     }
+
+    *cfglen = strlen(buf); 
+
+    *data = buf;
 
     out:
     cJSON_Delete(config);
@@ -79,8 +77,8 @@ gt_error parse_config(config *out, char *data){
 //messy
 gt_error parse_game_config(game_config *out, char *data){
     gt_error err = ok;
-
     cJSON *config, *handle, *in;
+    int len;
 
     config = handle = in = NULL;
 
@@ -90,11 +88,31 @@ gt_error parse_game_config(game_config *out, char *data){
 
     //name is handled somewhere else
     
+    handle = cJSON_GetObjectItem(config, "folder");
+
+    if(!cJSON_IsString(handle)){
+        err = failed_to_parse;
+        goto out;
+    }
+    
+    len = strlen(handle->valuestring);
+    
+    if(handle->valuestring[len] != '/'){
+        out->folder = copycatalloc(len+1, handle->valuestring, "/"); // +1 for /
+    } else {
+        out->folder = strdup(handle->valuestring);
+    }
+
     handle = cJSON_GetObjectItem(config, "executable");
 
-    if(cJSON_IsString(handle)){
-        out->executable = strdup(handle->valuestring);
+    if(!cJSON_IsString(handle)){
+        err = failed_to_parse;
+        goto out;
     }
+
+    out->executable = strdup(handle->valuestring);
+
+    //both folder and executable are necessary for a game to run xd
 
     handle = cJSON_GetObjectItem(config, "arguments");
 
@@ -137,8 +155,9 @@ gt_error parse_game_config(game_config *out, char *data){
 }
 
 void free_game_config(game_config *to_free){
-    free(to_free->name);
-    free(to_free->executable);
-    free(to_free->arguments);
-    free(to_free->wine.version);
+    cfree(to_free->name);
+    cfree(to_free->folder);
+    cfree(to_free->executable);
+    cfree(to_free->arguments);
+    cfree(to_free->wine.version);
 }

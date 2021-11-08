@@ -17,7 +17,7 @@ typedef enum {
     //run stats
     couldnt_find_wine,
     couldnt_find_script,
-    game_not_found,
+    game_folder_not_found,
     failed_to_start,
     //run ends
 

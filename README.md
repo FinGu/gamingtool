@@ -12,7 +12,6 @@ On first usage the .gamingtool folder is created in $HOME
   
 Folder structure of .gamingtool
 ```bash
-├── config
 ├── game
 │   └── game1
 │       ├── config

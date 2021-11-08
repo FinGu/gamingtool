@@ -2,31 +2,45 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "utils.h"
-#include "config.h"
+#include <unistd.h>
+#include <fcntl.h>
+#include <mimalloc.h>
 
-gt_error prun(char *process, int log){
-    FILE *file = popen(process, "r");
+#include "utils.h"
+
+gt_error prun(char* process, int log){
+    char buf[BUFSIZE];
+    FILE* file = popen(process, "r");
     
     if(!file){
         return failed_to_start;
     }
 
-    if(log){
-        char buf[BUFSIZE];
-
-        while(fgets(buf, BUFSIZE, file)){
+    while(fgets(buf, BUFSIZE, file)){
+        if(log){
             puts(buf);
         }
     }
+
+    /* if(log){ 
+        while(fgets(buf, BUFSIZE, file)){
+            puts(buf);
+        }
+    } else {
+        while(fgets(buf, BUFSIZE, file));
+    } */
 
     pclose(file);
 
     return ok;
 } 
 
+void *cmalloc(size_t size){ //custom malloc
+    return mi_malloc(size);
+}
+
 void *smalloc(size_t size){ //string malloc
-    char *out = malloc(sizeof(char)*(size + 1));
+    char *out = cmalloc(sizeof(char)*(size+1));
 
     if(!out){
         puts(PREFIX"Fatal issue, failed to allocate memory");
@@ -36,6 +50,10 @@ void *smalloc(size_t size){ //string malloc
     out[size] = '\0';
 
     return out;
+}
+
+void cfree(void *p){ //custom free
+    mi_free(p);
 }
 
 void pstrcat(char *dest, char *source){
