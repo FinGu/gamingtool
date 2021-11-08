@@ -15,37 +15,37 @@ void usage(void);
 
 int main(int argc, char **argv){
     gt_error err = ok;
-    char *folder = NULL, *argp, *argh;
+    char *argp;
+    string folder, argh;
     config cfg = {0};
-    size_t foldlen = 0; 
 
     if(argc < 3){
         usage();
         goto out;
     }
 
-    if((err = get_create_folder(&foldlen, &folder))){
+    if((err = get_create_folder(&folder))){
         goto out;
     } 
     
-    if((err = get_config(&cfg, foldlen, folder))){
+    if((err = get_config(&cfg, folder))){
         goto out;
     }
 
     argp = argv[1];
 
-    argh = argv[2];
+    argh = (string){strlen(argv[2]), argv[2]};
 
     if(strcmp(argp, "run") == 0) {
-        err = run(&cfg, foldlen, folder, strlen(argh), argh);
+        err = run(&cfg, folder, argh);
     } else if(strcmp(argp, "list") == 0){
-        err = ((strcmp(argh, "wine") == 0 || strcmp(argh, "game") == 0)) ?
-            list(foldlen, folder, argh) :
+        err = ((strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0)) ?
+            list(folder, argh.ptr) :
             failed_to_read;
     }
 
     out:
-    cfree(folder);
+    cfree(folder.ptr);
 
     if(err){
         print_error(err);

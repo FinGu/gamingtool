@@ -19,7 +19,7 @@ gt_error create_parser(cJSON **out, char *data){
     return ok;
 }
 
-gt_error create_config(size_t* cfglen, char **data){
+gt_error create_config(string* data){
     char *buf;
     cJSON *config = cJSON_CreateObject(), *log;
     gt_error err = ok;
@@ -39,9 +39,7 @@ gt_error create_config(size_t* cfglen, char **data){
         err = cjson_failure;
     }
 
-    *cfglen = strlen(buf); 
-
-    *data = buf;
+    *data = (string){strlen(buf), buf};
 
     out:
     cJSON_Delete(config);

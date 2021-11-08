@@ -14,6 +14,11 @@
 #define NSIZE 10
 
 typedef struct {
+    size_t len;
+    char *ptr;
+} string;
+
+typedef struct {
     int log;
 } config;
 
@@ -36,8 +41,8 @@ typedef struct {
     struct __game_scripts scripts;
 } game_config;
 
-gt_error get_config(config*, size_t, char*);
+gt_error get_config(config*, string);
 
-gt_error get_game_config(game_config*, size_t*, char**, size_t, char*, size_t, char*);
+gt_error get_game_config(game_config*, string*, string, string);
 
 #endif

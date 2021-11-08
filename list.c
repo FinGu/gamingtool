@@ -5,14 +5,14 @@
 #include "utils.h"
 #include "filesys.h"
 
-gt_error list(size_t foldlen, char *folder, char *arg){
+gt_error list(string folder, char *arg){
     size_t fblen;
     char *folderbuf;
     gt_error err = ok;
         
-    fblen = foldlen + 4; //for game or wine
+    fblen = folder.len + 4; //for game or wine
 
-    folderbuf = copycatalloc(fblen, folder, arg);
+    folderbuf = copycatalloc(fblen, folder.ptr, arg);
 
     printf(PREFIX);
 

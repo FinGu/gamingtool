@@ -1,6 +1,6 @@
 #include "config.h"
 
-gt_error create_config(size_t*, char**);
+gt_error create_config(string*);
 
 gt_error parse_config(config*, char*); //no free function needed as this doesnt allocate to the struct
 

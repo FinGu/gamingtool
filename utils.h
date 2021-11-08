@@ -2,6 +2,8 @@
 
 #define BUFSIZE 2048
 
+void escapeshellargs(); //TODO
+
 gt_error prun(char*, int log);
 
 void pstrcat(char*, char*);

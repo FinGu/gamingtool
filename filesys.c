@@ -75,10 +75,10 @@ gt_error print_files_in_folder(char *folder){
     return ok;
 }
 
-gt_error read_write_config(int mode, size_t bufsize, char *buf, size_t foldlen, char *folder){ 
+gt_error read_write_config(int mode, size_t bufsize, char *buf, string folder){ 
     gt_error err = ok;
-    size_t nlen = foldlen + 6; //6 for config
-    char *location = copycatalloc(nlen, folder, "config");
+    size_t nlen = folder.len + 6; //6 for config
+    char *location = copycatalloc(nlen, folder.ptr, "config");
 
     err = read_write_file(mode, bufsize, buf, location);
 
@@ -87,22 +87,21 @@ gt_error read_write_config(int mode, size_t bufsize, char *buf, size_t foldlen, 
     return err; 
 }
 
-gt_error get_game_folder(size_t *outlen, char **outstr, size_t folderlen, char *folder, size_t gamelen, char *game){
+gt_error get_game_folder(string *out, string folder, string game){
     gt_error err = ok;
     char *cout;
-    size_t nlen = folderlen + 6 + gamelen; // 6 for game//
+    size_t nlen = folder.len + 6 + game.len; // 6 for game//
     
     cout = smalloc(nlen);
 
-    sprintf(cout, "%sgame/%s/", folder, game);
+    sprintf(cout, "%sgame/%s/", folder.ptr, game.ptr);
 
     if(!can_access(cout, 1)){ //probably should remove this as read_write_file does this job
         err = failed_to_open;
         goto out;
     }
 
-    *outlen = nlen;
-    *outstr = cout;
+    *out = (string){nlen, cout};
 
     out:
     if(err){
@@ -112,7 +111,7 @@ gt_error get_game_folder(size_t *outlen, char **outstr, size_t folderlen, char *
     return err;
 }
 
-gt_error get_create_folder(size_t *outlen, char **outstr){
+gt_error get_create_folder(string *out){
     gt_error err = ok;
     char *home = getenv("HOME"), *folder, *nfolder;
     size_t slen;
@@ -147,8 +146,7 @@ gt_error get_create_folder(size_t *outlen, char **outstr){
         cfree(nfolder);
     }
 
-    *outstr = folder; 
-    *outlen = slen;
+    *out = (string){slen, folder};
 
     out:
     if(err){

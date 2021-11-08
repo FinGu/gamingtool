@@ -22,14 +22,6 @@ gt_error prun(char* process, int log){
         }
     }
 
-    /* if(log){ 
-        while(fgets(buf, BUFSIZE, file)){
-            puts(buf);
-        }
-    } else {
-        while(fgets(buf, BUFSIZE, file));
-    } */
-
     pclose(file);
 
     return ok;
@@ -38,7 +30,6 @@ gt_error prun(char* process, int log){
 void *cmalloc(size_t size){ //custom malloc
     return mi_malloc(size);
 }
-
 void *smalloc(size_t size){ //string malloc
     char *out = cmalloc(sizeof(char)*(size+1));
 

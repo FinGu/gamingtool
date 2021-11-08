@@ -7,42 +7,41 @@
 #include "filesys.h"
 #include "parse.h"
 
-gt_error get_config(config *in, size_t foldlen, char *folder){
+gt_error get_config(config *in, string folder){
     gt_error err = ok;
-    size_t cfgsize = 0;
     char buf[BUFSIZE] = {0};
-    char *cfgbuf = NULL;
+    string cfg = {0, NULL};
 
-    if((err = read_write_config(O_RDONLY, BUFSIZE, buf, foldlen, folder))) {
-        if((err = create_config(&cfgsize, &cfgbuf))){
+    if((err = read_write_config(O_RDONLY, BUFSIZE, buf, folder))) {
+        if((err = create_config(&cfg))){
             goto out;
         }
 
-        if((err = read_write_config(O_CREAT | O_WRONLY | O_TRUNC | S_IRWXU, cfgsize, cfgbuf, foldlen, folder))){
+        if((err = read_write_config(O_CREAT | O_WRONLY | O_TRUNC | S_IRWXU, cfg.len, cfg.ptr, folder))){
             goto out;
         }
     }
 
-    err = parse_config(in, ((cfgbuf) ? cfgbuf : buf));
+    err = parse_config(in, ((cfg.ptr) ? cfg.ptr : buf));
     
     out:
-    cfree(cfgbuf);
+    cfree(cfg.ptr);
 
     return err;
 }
 
-gt_error get_game_config(game_config* in, size_t *game_folder_len, char** game_folder, size_t foldlen, char *folder, size_t gamelen, char *game){
+gt_error get_game_config(game_config* in, string* game_folder, string folder, string game){
     gt_error err = ok;
-    char buf[BUFSIZE] = {0}, *__game_folder = NULL;
-    size_t __game_folder_len = 0;
+    char buf[BUFSIZE] = {0}; 
+    string __game_folder = {0, NULL};
 
-    if((err = get_game_folder(&__game_folder_len, &__game_folder, foldlen, folder, gamelen, game))){
+    if((err = get_game_folder(&__game_folder, folder, game))){
         goto out;
     }
 
-    in->name = strdup(game);
+    in->name = strdup(game.ptr);
     
-    if((err = read_write_config(O_RDONLY, BUFSIZE, buf, __game_folder_len, __game_folder))){
+    if((err = read_write_config(O_RDONLY, BUFSIZE, buf, __game_folder))){
         goto out;
     }
 
@@ -52,7 +51,7 @@ gt_error get_game_config(game_config* in, size_t *game_folder_len, char** game_f
     
     out:
     if(err){
-        cfree(__game_folder);
+        cfree(__game_folder.ptr);
     }
 
     return err;
