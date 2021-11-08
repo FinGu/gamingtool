@@ -2,6 +2,7 @@
 #include <string.h>
 
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "run.h"
 #include "utils.h"
@@ -75,31 +76,19 @@ gt_error run_game(config* cfg, game_config *gamecfg, size_t game_folder_len, cha
         goto out;
     }
     
-    //glen = strlen(gamecfg->executable) + ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0) + 1; //1 for " "
-
-    //gbuf = copycatalloc(glen, gamecfg->executable, " ");
-
-    /* if(gamecfg->arguments){
-        pstrcat(gbuf, gamecfg->arguments);
-    } */
-
     if(gamecfg->scripts.prelaunch){
         if(cfg->log){
             puts(PREFIX"Running the prelaunch script");
         }
 
-        slen = strlen(game_folder) + 9; //9 for prelaunch
+        chdir(game_folder);
 
-        sbuf = copycatalloc(slen, game_folder, "prelaunch");
-
-        serr = ((can_access(sbuf, 0)) ? prun(sbuf, cfg->log) : failed_to_start);
+        serr = prun("prelaunch", cfg->log);
 
         if(cfg->log && serr){
             puts(PREFIX"Failed to run the prelaunch script with error: ");
             print_error(serr);
         } 
-
-        cfree(sbuf);
     }
 
     if(cfg->log){
@@ -117,29 +106,22 @@ gt_error run_game(config* cfg, game_config *gamecfg, size_t game_folder_len, cha
             puts(PREFIX"Running the postlaunch script");
         }
 
-        slen = strlen(game_folder) + 10; //10 for postlaunch
+        chdir(game_folder);
 
-        sbuf = copycatalloc(slen, game_folder, "postlaunch");
-
-        serr = ((can_access(sbuf, 0)) ? prun(sbuf, cfg->log) : failed_to_start);
+        serr = prun("postlaunch", cfg->log);
 
         if(cfg->log && serr){
             puts(PREFIX"Failed to run the prelaunch script");
             print_error(serr);
         } 
-
-        cfree(sbuf);
     }
-
     out:
-    //cfree(gbuf);
-
     return err;
 }
 
 gt_error game_process_run(game_config *gamecfg, size_t game_folder_len, char *game_folder, int log){
     gt_error err;
-    size_t wlen = 0, len = strlen(gamecfg->folder) + strlen(gamecfg->executable) + 13; //13 for the full command 
+    size_t wlen = 0, len = strlen(gamecfg->executable) + 8; //8 for the full command 
     char *cmd, *winepath;
 
     cmd = winepath = NULL;
@@ -153,10 +135,11 @@ gt_error game_process_run(game_config *gamecfg, size_t game_folder_len, char *ga
         len += wlen;
     }
 
+    chdir(gamecfg->folder);
+
     cmd = smalloc(len);
 
-    sprintf(cmd, "cd \"%s\" && %s ./%s %s", 
-            gamecfg->folder, ((gamecfg->wine.enabled) ? winepath : ""), gamecfg->executable, ((gamecfg->arguments) ? gamecfg->arguments : "")); //more convenient for me
+    sprintf(cmd, "%s ./\"%s\" \"%s\"", ((gamecfg->wine.enabled) ? winepath : ""), gamecfg->executable, gamecfg->arguments); //convenient
 
     err = prun(cmd, log);
 
