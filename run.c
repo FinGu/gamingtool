@@ -97,7 +97,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         }
     }
 
-    game_process_run(gamecfg, game_folder, cfg->log);
+    game_process_run(gamecfg, folder, cfg->log);
 
     if(gamecfg->scripts.postlaunch) {
         if(cfg->log){
@@ -116,30 +116,47 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     return err;
 }
 
-gt_error game_process_run(game_config *gamecfg, string game_folder, int log){
+gt_error game_process_run(game_config *gamecfg, string folder, int log){
     gt_error err;
-    size_t len = strlen(gamecfg->executable) + 10; //10 for the full command 
+
+    size_t glen = ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0); 
+    size_t elen = strlen(gamecfg->executable);
+    size_t len = 10; //10 for the full command 
+
     char *cmd = NULL;
-    string winepath = {0, NULL};
+    string winepath, a, b, c;
 
-    len += ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0);
+    winepath = a = b = c = (string){0, NULL};
 
-    if(gamecfg->wine.enabled){
-        if((err = find_wine(&winepath, game_folder, gamecfg->wine.version))){
-            goto out;
-        }
-        len += winepath.len;
+    if(gamecfg->wine.enabled && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
+        goto out;
     }
 
     chdir(gamecfg->folder);
 
-    cmd = smalloc(len);
+    escapeshellargs(&a, (string){elen, gamecfg->executable});
 
-    sprintf(cmd, "%s ./%s %s", ((gamecfg->wine.enabled) ? winepath.ptr : ""), gamecfg->executable, ((gamecfg->arguments) ? gamecfg->arguments : "")); //convenient
+    escapeshellargs(&b, ((gamecfg->arguments) ? (string){glen, gamecfg->arguments} : c));
+    
+    if(gamecfg->wine.enabled){
+        escapeshellargs(&c, winepath); 
+
+        cmd = smalloc(len + a.len + b.len + c.len);
+
+        sprintf(cmd, "'%s' ./'%s' '%s'", c.ptr, a.ptr, b.ptr); //convenient
+    } else {
+        cmd = smalloc(len + a.len + b.len);
+
+        sprintf(cmd, "./'%s' '%s'", a.ptr, b.ptr);
+    }
 
     err = prun(cmd, log);
 
     out:
+    cfree(a.ptr);
+    cfree(b.ptr);
+    cfree(c.ptr);
+
     cfree(winepath.ptr);
     cfree(cmd);
 

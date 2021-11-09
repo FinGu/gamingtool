@@ -8,6 +8,44 @@
 
 #include "utils.h"
 
+void escapeshellargs(string* out, string in){
+    size_t len, i, n, j;
+    char *buf;
+
+    i = n = 0;
+
+    for(; i < in.len; ++i){
+        if(in.ptr[i] == '\''){
+            ++n; 
+        }
+    }
+
+    len = (in.len-n) + n * 4;
+
+    buf = smalloc(len);
+    
+    //buf[0] = '\'';
+    
+    for(i = j = 0; i < in.len; i++){
+        /* if(in.len == i){
+            break;
+        } */
+
+        if(in.ptr[i] == '\''){
+            buf[j] = '\'';
+            buf[j+1] = '\\';
+            buf[j+2] = '\'';
+            buf[j+3] = '\'';
+            j += 4;
+        } else{
+            buf[j] = in.ptr[i];
+            ++j;
+        }
+    }
+
+    *out = (string){len, buf};
+}
+
 gt_error prun(char* process, int log){
     char buf[BUFSIZE];
     FILE* file = popen(process, "r");
