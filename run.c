@@ -60,7 +60,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
         cfree(cout);
     }
 
-    return ok;
+    return err;
 }
 
 gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string folder){
@@ -97,7 +97,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         }
     }
 
-    game_process_run(gamecfg, folder, cfg->log);
+    err = game_process_run(gamecfg, folder, cfg->log);
 
     if(gamecfg->scripts.postlaunch) {
         if(cfg->log){
@@ -117,7 +117,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 }
 
 gt_error game_process_run(game_config *gamecfg, string folder, int log){
-    gt_error err;
+    gt_error err = ok;
 
     size_t len = 10; //10 for the full command 
 
