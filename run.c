@@ -119,14 +119,17 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 gt_error game_process_run(game_config *gamecfg, string folder, int log){
     gt_error err;
 
-    size_t glen = ((gamecfg->arguments) ? strlen(gamecfg->arguments) : 0); 
-    size_t elen = strlen(gamecfg->executable);
     size_t len = 10; //10 for the full command 
 
-    char *cmd = NULL;
+    string executable, arguments;
     string winepath, a, b, c;
+    char *cmd = NULL;
 
     winepath = a = b = c = (string){0, NULL};
+
+    executable = (string){strlen(gamecfg->executable), gamecfg->executable};
+
+    arguments = ((gamecfg->arguments) ? (string){strlen(gamecfg->arguments), gamecfg->arguments} : c);
 
     if(gamecfg->wine.enabled && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
         goto out;
@@ -134,25 +137,26 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
 
     chdir(gamecfg->folder);
 
-    escapeshellargs(&a, (string){elen, gamecfg->executable});
+    escapeshellargs(&a, executable);
 
-    escapeshellargs(&b, ((gamecfg->arguments) ? (string){glen, gamecfg->arguments} : c));
+    escapeshellargs(&b, arguments);
+
+    len += a.len + b.len;
     
     if(gamecfg->wine.enabled){
         escapeshellargs(&c, winepath); 
 
-        cmd = smalloc(len + a.len + b.len + c.len);
+        cmd = smalloc(len + c.len);
 
         sprintf(cmd, "'%s' ./'%s' '%s'", c.ptr, a.ptr, b.ptr); //convenient
     } else {
-        cmd = smalloc(len + a.len + b.len);
+        cmd = smalloc(len);
 
         sprintf(cmd, "./'%s' '%s'", a.ptr, b.ptr);
     }
 
     err = prun(cmd, log);
 
-    out:
     cfree(a.ptr);
     cfree(b.ptr);
     cfree(c.ptr);
@@ -160,5 +164,6 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
     cfree(winepath.ptr);
     cfree(cmd);
 
+    out:
     return err; 
 }
