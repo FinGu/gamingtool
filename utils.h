@@ -12,10 +12,10 @@ void pstrcpy(char*, char*);
 
 void copycat(char*, char*, char*); 
 
-void *cmalloc(size_t); //custom malloc
+void *scalloc(size_t, size_t); //safe calloc
 
-void *smalloc(size_t); //str malloc
+string salloc(size_t); //string alloc
+
+void sfree(string); //string free
 
 char *copycatalloc(size_t, char*, char*);
-
-void cfree(void*); //custom free 

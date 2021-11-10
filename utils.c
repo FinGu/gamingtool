@@ -4,13 +4,12 @@
 
 #include <unistd.h>
 #include <fcntl.h>
-#include <mimalloc.h>
 
 #include "utils.h"
 
 void escapeshellargs(string* out, string in){
     size_t len, i, n, j;
-    char *buf;
+    string buf;
 
     i = n = 0;
 
@@ -22,28 +21,22 @@ void escapeshellargs(string* out, string in){
 
     len = (in.len-n) + n * 4;
 
-    buf = smalloc(len);
-    
-    //buf[0] = '\'';
+    buf = salloc(len);
     
     for(i = j = 0; i < in.len; i++){
-        /* if(in.len == i){
-            break;
-        } */
-
         if(in.ptr[i] == '\''){
-            buf[j] = '\'';
-            buf[j+1] = '\\';
-            buf[j+2] = '\'';
-            buf[j+3] = '\'';
+            buf.ptr[j] = '\'';
+            buf.ptr[j+1] = '\\';
+            buf.ptr[j+2] = '\'';
+            buf.ptr[j+3] = '\'';
             j += 4;
         } else{
-            buf[j] = in.ptr[i];
+            buf.ptr[j] = in.ptr[i];
             ++j;
         }
     }
 
-    *out = (string){len, buf};
+    *out = buf;
 }
 
 gt_error prun(char* process, int log){
@@ -65,24 +58,25 @@ gt_error prun(char* process, int log){
     return ok;
 } 
 
-void *cmalloc(size_t size){ //custom malloc
-    return mi_malloc(size);
-}
-void *smalloc(size_t size){ //string malloc
-    char *out = cmalloc(sizeof(char)*(size+1));
+void *scalloc(size_t num, size_t size){ //safe calloc
+    void *out = calloc(num, size);
 
     if(!out){
         puts(PREFIX"Fatal issue, failed to allocate memory");
         exit(-1);
     }
 
-    out[size] = '\0';
-
     return out;
 }
 
-void cfree(void *p){ //custom free
-    mi_free(p);
+string salloc(size_t size){ //string alloc
+    char *mem = scalloc(size+1, sizeof(char));
+
+    return (string){size, mem};
+}
+
+void sfree(string to_free){
+    free(to_free.ptr);
 }
 
 void pstrcat(char *dest, char *source){
@@ -104,8 +98,8 @@ void copycat(char *buf, char *copy, char *cat){
 }
 
 char *copycatalloc(size_t size, char *copy, char *cat){
-    char *out = smalloc(size);
-    
+    char *out = scalloc(size+1, sizeof(char));
+
     copycat(out, copy, cat); 
 
     return out;

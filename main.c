@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <fcntl.h>
 
@@ -9,7 +10,6 @@
 #include "filesys.h"
 #include "run.h"
 #include "list.h"
-#include "utils.h"
 
 void usage(void);
 
@@ -39,13 +39,15 @@ int main(int argc, char **argv){
     if(strcmp(argp, "run") == 0) {
         err = run(&cfg, folder, argh);
     } else if(strcmp(argp, "list") == 0){
-        err = ((strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0)) ?
-            list(folder, argh.ptr) :
-            failed_to_read;
+        if(strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0){
+            err = list(folder, argh.ptr);
+        } else{
+            err = failed_to_read;
+        }
     }
 
     out:
-    cfree(folder.ptr);
+    free(folder.ptr);
 
     if(err){
         print_error(err);

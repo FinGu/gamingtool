@@ -78,34 +78,35 @@ gt_error print_files_in_folder(char *folder){
 gt_error read_write_config(int mode, size_t bufsize, char *buf, string folder){ 
     gt_error err = ok;
     size_t nlen = folder.len + 6; //6 for config
+
     char *location = copycatalloc(nlen, folder.ptr, "config");
 
     err = read_write_file(mode, bufsize, buf, location);
 
-    cfree(location);
+    free(location);
 
     return err; 
 }
 
 gt_error get_game_folder(string *out, string folder, string game){
     gt_error err = ok;
-    char *cout;
+    string cout;
     size_t nlen = folder.len + 6 + game.len; // 6 for game//
     
-    cout = smalloc(nlen);
+    cout = salloc(nlen);
 
-    sprintf(cout, "%sgame/%s/", folder.ptr, game.ptr);
+    sprintf(cout.ptr, "%sgame/%s/", folder.ptr, game.ptr);
 
-    if(!can_access(cout, 1)){ //probably should remove this as read_write_file does this job
+    if(!can_access(cout.ptr, 1)){ //probably should remove this as read_write_file does this job
         err = failed_to_open;
         goto out;
     }
 
-    *out = (string){nlen, cout};
+    *out = cout;
 
     out:
     if(err){
-        cfree(cout);
+        sfree(cout);
     }
 
     return err;
@@ -113,7 +114,8 @@ gt_error get_game_folder(string *out, string folder, string game){
 
 gt_error get_create_folder(string *out){
     gt_error err = ok;
-    char *home = getenv("HOME"), *folder, *nfolder;
+    char *home = getenv("HOME"), *nfolder;
+    string folder;
     size_t slen;
 
     if(!home){
@@ -123,17 +125,19 @@ gt_error get_create_folder(string *out){
 
     slen = strlen(home) + NSIZE + 3; //+1 for . and +2 for /
 
-    folder = copycatalloc(slen, home, DIRNAME);
-    
-    pstrcat(folder, "/");
+    folder = salloc(slen);
 
-    if(!can_access(folder, 1)){
-        if(mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
+    copycat(folder.ptr, home, DIRNAME);
+    
+    pstrcat(folder.ptr, "/");
+
+    if(!can_access(folder.ptr, 1)){
+        if(mkdir(folder.ptr, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
             err = failed_to_create_dir;
             goto out;
         }
 
-        nfolder = copycatalloc(slen + 4, folder, "game"); // + 4 for the subfolder name
+        nfolder = copycatalloc(slen + 4, folder.ptr, "game"); // + 4 for the subfolder name
 
         mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO); //shouldn't fail
 
@@ -143,14 +147,14 @@ gt_error get_create_folder(string *out){
 
         mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO);
 
-        cfree(nfolder);
+        free(nfolder);
     }
 
-    *out = (string){slen, folder};
+    *out = folder;
 
     out:
     if(err){
-        cfree(folder);
+        sfree(folder);
     }
 
     return err;

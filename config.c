@@ -1,5 +1,6 @@
 #include <fcntl.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "config.h"
 
@@ -25,7 +26,7 @@ gt_error get_config(config *in, string folder){
     err = parse_config(in, ((cfg.ptr) ? cfg.ptr : buf));
     
     out:
-    cfree(cfg.ptr);
+    free(cfg.ptr);
 
     return err;
 }
@@ -51,7 +52,7 @@ gt_error get_game_config(game_config* in, string* game_folder, string folder, st
     
     out:
     if(err){
-        cfree(__game_folder.ptr);
+        free(__game_folder.ptr);
     }
 
     return err;

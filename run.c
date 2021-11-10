@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <fcntl.h>
 #include <unistd.h>
@@ -24,7 +25,7 @@ gt_error run(config* cfg, string folder, string game){
  
     err = run_game(cfg, &gamecfg, game_folder, folder);
 
-    cfree(game_folder.ptr);
+    free(game_folder.ptr);
 
     out: 
     free_game_config(&gamecfg);
@@ -34,30 +35,30 @@ gt_error run(config* cfg, string folder, string game){
 
 gt_error find_wine(string *out, string folder, char *wine){ //we don't have the length of wine
     gt_error err = ok;
-    char *cout;
-    int len;
+    string cout;
+    size_t len;
 
     if(!wine) {
         err = couldnt_find_wine;
         goto out;
     }
 
-    len = folder.len + strlen(wine) + 14; //5 for wine/, 9 for /bin/wine 
+    len = folder.len + strlen(wine) + 14; //5 for wine/, 9 for /bin/wine, 1 for 0
 
-    cout = smalloc(len);
+    cout = salloc(len);
 
-    sprintf(cout, "%swine/%s/bin/wine", folder.ptr, wine);
+    sprintf(cout.ptr, "%swine/%s/bin/wine", folder.ptr, wine);
 
-    if(!can_access(cout, 0)){
+    if(!can_access(cout.ptr, 0)){
         err = couldnt_find_wine;
         goto out;
     }
 
-    *out = (string){len, cout};
+    *out = cout;
 
     out:
     if(err){
-        cfree(cout);
+        sfree(cout);
     }
 
     return err;
@@ -119,7 +120,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 gt_error game_process_run(game_config *gamecfg, string folder, int log){
     gt_error err = ok;
 
-    size_t len = 10; //10 for the full command 
+    size_t len = 10 + 1; //10 for the full command, 1 for 0
 
     string executable, arguments;
     string winepath, a, b, c;
@@ -146,23 +147,23 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
     if(gamecfg->wine.enabled){
         escapeshellargs(&c, winepath); 
 
-        cmd = smalloc(len + c.len);
+        cmd = scalloc(len + c.len, sizeof(char));
 
         sprintf(cmd, "'%s' ./'%s' '%s'", c.ptr, a.ptr, b.ptr); //convenient
     } else {
-        cmd = smalloc(len);
+        cmd = scalloc(len, sizeof(char));
 
         sprintf(cmd, "./'%s' '%s'", a.ptr, b.ptr);
     }
 
     err = prun(cmd, log);
 
-    cfree(a.ptr);
-    cfree(b.ptr);
-    cfree(c.ptr);
+    free(a.ptr);
+    free(b.ptr);
+    free(c.ptr);
 
-    cfree(winepath.ptr);
-    cfree(cmd);
+    free(winepath.ptr);
+    free(cmd);
 
     out:
     return err; 

@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "list.h"
 #include "utils.h"
@@ -18,7 +19,7 @@ gt_error list(string folder, char *arg){
 
     err = print_files_in_folder(folderbuf);
 
-    cfree(folderbuf);
+    free(folderbuf);
 
     return err;
 }

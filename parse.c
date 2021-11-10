@@ -1,6 +1,7 @@
 #include <cjson/cJSON.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "parse.h"
 #include "utils.h"
@@ -96,7 +97,7 @@ gt_error parse_game_config(game_config *out, char *data){
     len = strlen(handle->valuestring);
     
     if(handle->valuestring[len] != '/'){
-        out->folder = copycatalloc(len+1, handle->valuestring, "/"); // +1 for /
+        out->folder = copycatalloc(len+1, handle->valuestring, "/"); //1 for /
     } else {
         out->folder = strdup(handle->valuestring);
     }
@@ -153,9 +154,9 @@ gt_error parse_game_config(game_config *out, char *data){
 }
 
 void free_game_config(game_config *to_free){
-    cfree(to_free->name);
-    cfree(to_free->folder);
-    cfree(to_free->executable);
-    cfree(to_free->arguments);
-    cfree(to_free->wine.version);
+    free(to_free->name);
+    free(to_free->folder);
+    free(to_free->executable);
+    free(to_free->arguments);
+    free(to_free->wine.version);
 }
