@@ -82,7 +82,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Running the prelaunch script");
         }
 
-        serr = prun("prelaunch", cfg->log);
+        serr = prun("./prelaunch", cfg->log);
 
         if(cfg->log && serr){
             puts(PREFIX"Failed to run the prelaunch script with error: ");
@@ -105,7 +105,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Running the postlaunch script");
         }
 
-        serr = prun("postlaunch", cfg->log);
+        serr = prun("./postlaunch", cfg->log);
 
         if(cfg->log && serr){
             puts(PREFIX"Failed to run the prelaunch script");
