@@ -2,7 +2,7 @@
 
 #define BUFSIZE 2048
 
-void escapeshellargs(string*, string); //TODO
+void escapeshellargs(string*, string); 
 
 gt_error prun(char*, int log);
 
