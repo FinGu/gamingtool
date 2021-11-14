@@ -39,11 +39,9 @@ int main(int argc, char **argv){
     if(strcmp(argp, "run") == 0) {
         err = run(&cfg, folder, argh);
     } else if(strcmp(argp, "list") == 0){
-        if(strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0){
-            err = list(folder, argh.ptr);
-        } else{
-            err = failed_to_read;
-        }
+        err = ((strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0) 
+                ? list(folder, argh.ptr) 
+                : invalid_input);
     }
 
     out:

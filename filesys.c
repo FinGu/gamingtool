@@ -10,16 +10,16 @@
 #include "filesys.h"
 #include "utils.h"
 
-int can_access(char *file, int folder){
+int can_access(char *file, int perm){
     struct stat s;
 
     int exists = lstat(file, &s) == 0;
-
-    if((!exists) || (folder && !S_ISDIR(s.st_mode))){
-        return 0;
+    
+    if(exists && (perm == 0 || (s.st_mode & perm))) {
+        return 1;
     }
 
-    return 1;
+    return 0;
 }
 
 gt_error read_write_file(int mode, size_t size, char *buf, char *file_location){
@@ -97,7 +97,7 @@ gt_error get_game_folder(string *out, string folder, string game){
 
     sprintf(cout.ptr, "%sgame/%s/", folder.ptr, game.ptr);
 
-    if(!can_access(cout.ptr, 1)){ //probably should remove this as read_write_file does this job
+    if(!can_access(cout.ptr, S_IFDIR)){ //probably should remove this as read_write_file does this job
         err = failed_to_open;
         goto out;
     }
@@ -131,7 +131,7 @@ gt_error get_create_folder(string *out){
     
     pstrcat(folder.ptr, "/");
 
-    if(!can_access(folder.ptr, 1)){
+    if(!can_access(folder.ptr, S_IFDIR)){
         if(mkdir(folder.ptr, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
             err = failed_to_create_dir;
             goto out;
