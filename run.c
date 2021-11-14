@@ -116,7 +116,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
         serr = (can_access(scpath, S_IXUSR) ? prun(scpath, cfg->log) : failed_to_execute);
 
-        //no need to clear postlanch
+        //no need to clear postlaunch
 
         if(cfg->log && serr){
             puts(PREFIX"Failed to run the prelaunch script");
@@ -133,7 +133,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 gt_error game_process_run(game_config *gamecfg, string folder, int log){
     gt_error err = ok;
 
-    size_t clen = 10 + 1, plen = strlen(gamecfg->path); //10 for the full command, 1 for 0
+    size_t clen = 10 + 1, plen = strlen(gamecfg->path), tidx; //10 for the full command, 1 for 0
     char *cmd = NULL;
 
     string executable, arguments;
@@ -148,10 +148,14 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
     if(gamecfg->wine.enabled && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
         goto out;
     }
+    
+    tidx = plen - executable.len - 1;
 
-    gamecfg->path[plen - executable.len - 1] = '\0'; // sets the last slash to a 0 and make it a valid folder
+    gamecfg->path[tidx] = '\0'; // sets the last slash to a 0 to get the folder path without the executable
 
     chdir(gamecfg->path);
+    
+    gamecfg->path[tidx] = '/'; // sets the original value back, for debugging purposes
 
     escapeshellargs(&a, executable);
 
