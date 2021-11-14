@@ -77,7 +77,6 @@ gt_error parse_config(config *out, char *data){
 gt_error parse_game_config(game_config *out, char *data){
     gt_error err = ok;
     cJSON *config, *handle, *in;
-    int len;
 
     config = handle = in = NULL;
 
@@ -87,31 +86,15 @@ gt_error parse_game_config(game_config *out, char *data){
 
     //name is handled somewhere else
     
-    handle = cJSON_GetObjectItem(config, "folder");
-
-    if(!cJSON_IsString(handle)){
-        err = failed_to_parse;
-        goto out;
-    }
-    
-    len = strlen(handle->valuestring);
-    
-    if(handle->valuestring[len] != '/'){
-        out->folder = copycatalloc(len+1, handle->valuestring, "/"); //1 for /
-    } else {
-        out->folder = strdup(handle->valuestring);
-    }
-
-    handle = cJSON_GetObjectItem(config, "executable");
+    handle = cJSON_GetObjectItem(config, "path");
 
     if(!cJSON_IsString(handle)){
         err = failed_to_parse;
         goto out;
     }
 
-    out->executable = strdup(handle->valuestring);
-
-    //both folder and executable are necessary for a game to run xd
+    out->path = strdup(handle->valuestring);
+    //the path of the game is necessary 
 
     handle = cJSON_GetObjectItem(config, "arguments");
 
@@ -155,8 +138,7 @@ gt_error parse_game_config(game_config *out, char *data){
 
 void free_game_config(game_config *to_free){
     free(to_free->name);
-    free(to_free->folder);
-    free(to_free->executable);
+    free(to_free->path);
     free(to_free->arguments);
     free(to_free->wine.version);
 }

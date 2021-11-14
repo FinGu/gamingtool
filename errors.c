@@ -8,16 +8,17 @@ void print_error(gt_error error){
 
     struct { gt_error err; char* msg; } err_table[] = {
         {ok, NULL},
+        {invalid_input, "Invalid input"},
         {failed_to_open, "Failed to open the file"},
         {failed_to_read, "Failed to read the file"},
         {failed_to_write, "Failed to write to the file"},
         {failed_to_create_dir, "Failed to create directories"},
+        {failed_to_execute, "Failed to execute ( no execute permissions )"},
         {home_not_found, "The environment variable HOME wasn't found, please create it before proceeding"},
         {failed_to_parse, "Failed to parse the file"},
         {cjson_failure, "cJSON failed, report this"},
+        {game_not_found, "The game path couldn't be accessed"}, 
         {couldnt_find_wine, "Couldn't find the wine version"},
-        {couldnt_find_script, "Couldn't find one of the scripts"},
-        {game_folder_not_found, "The game folder couldn't be found"}, 
         {failed_to_start, "Failed to start process"}
     };
 

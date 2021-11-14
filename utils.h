@@ -2,6 +2,8 @@
 
 #define BUFSIZE 2048
 
+string get_file_from_path(string); 
+
 void escapeshellargs(string*, string); 
 
 gt_error prun(char*, int log);

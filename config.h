@@ -34,8 +34,7 @@ struct __game_scripts{
 
 typedef struct {
     char *name; //this var is the name of the game's folder
-    char *folder;
-    char *executable;
+    char *path;
     char *arguments;
     struct __game_wine wine;
     struct __game_scripts scripts;

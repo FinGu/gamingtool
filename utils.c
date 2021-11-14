@@ -7,6 +7,19 @@
 
 #include "utils.h"
 
+string get_file_from_path(string in){
+    size_t i;
+    char *ptr = NULL;
+
+    for(i = 0; i < in.len; i++){
+        if(in.ptr[i] == '/'){
+            ptr = &in.ptr[i+1]; //fine because in.len doesnt include the term
+        }
+    }
+
+    return (string){strlen(ptr), ptr};
+} 
+
 void escapeshellargs(string* out, string in){
     size_t len, i, n, j;
     string buf;
@@ -47,10 +60,12 @@ gt_error prun(char* process, int log){
         return failed_to_start;
     }
 
-    while(fgets(buf, BUFSIZE, file)){
-        if(log){
+    if(log){
+        while(fgets(buf, BUFSIZE, file)){
             puts(buf);
         }
+    } else{
+        while(fgets(buf, BUFSIZE, file));
     }
 
     pclose(file);
