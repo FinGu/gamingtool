@@ -23,7 +23,6 @@ typedef struct {
 } config;
 
 struct __game_wine{
-    int enabled;
     char *version;
 };
 

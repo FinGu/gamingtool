@@ -104,17 +104,11 @@ gt_error parse_game_config(game_config *out, char *data){
 
     handle = cJSON_GetObjectItem(config, "wine");
 
-    in = cJSON_GetObjectItem(handle, "enabled");
+    in = cJSON_GetObjectItem(handle, "version");
 
-    out->wine.enabled = ((cJSON_IsBool(in)) ? in->valueint : 0);
-
-    if(out->wine.enabled){
-        in = cJSON_GetObjectItem(handle, "version");
-
-        if(cJSON_IsString(in)){
-            out->wine.version = strdup(in->valuestring);
-        }    
-    } 
+    if(cJSON_IsString(in)){
+        out->wine.version = strdup(in->valuestring);
+    }
 
     handle = cJSON_GetObjectItem(config, "scripts");
 

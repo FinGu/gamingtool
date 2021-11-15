@@ -2,7 +2,6 @@
  "path": "/usr/bin/echo"
  "arguments": "Hello World",
  "wine": {
- "enabled": false,
  "version": ""
  },
  "scripts":{

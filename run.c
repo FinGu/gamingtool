@@ -100,7 +100,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     if(cfg->log){
         printf(PREFIX"Running game %s\n", gamecfg->name);
 
-        if(gamecfg->wine.enabled){
+        if(gamecfg->wine.version){
             puts(PREFIX"Wine is enabled");
         }
     }
@@ -145,7 +145,7 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
 
     arguments = ((gamecfg->arguments) ? (string){strlen(gamecfg->arguments), gamecfg->arguments} : c);
 
-    if(gamecfg->wine.enabled && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
+    if(gamecfg->wine.version && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
         goto out;
     }
     
@@ -163,7 +163,7 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
 
     clen += a.len + b.len;
     
-    if(gamecfg->wine.enabled){
+    if(gamecfg->wine.version){
         escapeshellargs(&c, winepath); 
 
         cmd = scalloc(clen + c.len, sizeof(char));
