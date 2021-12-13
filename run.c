@@ -47,18 +47,34 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
     cout = salloc(len);
 
-    sprintf(cout.ptr, "%swine/%s/bin/wine", folder.ptr, wine);
+    sprintf(cout.ptr, "%swine/%s/", folder.ptr, wine);
 
     if(!can_access(cout.ptr, 0)){
         err = couldnt_find_wine;
         goto out;
     }
 
-    *out = cout;
+    pstrcat(cout.ptr, "wine");
+
+    if(can_access(cout.ptr, S_IXUSR)){
+        goto out;
+    } 
+    
+    memset(&cout.ptr[len-8], 0, 4); //clears only wine
+
+    pstrcat(cout.ptr, "bin/wine");
+
+    if (can_access(cout.ptr, S_IXUSR)){
+        goto out;
+    }
+
+    err = couldnt_find_wine;
 
     out:
     if(err){
         sfree(cout);
+    } else{
+        *out = cout;
     }
 
     return err;
@@ -75,7 +91,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     }
 
     if(gamecfg->scripts.prelaunch || gamecfg->scripts.postlaunch){
-        scpath = scalloc(game_folder.len + 10, sizeof(char)); //10 for the script name
+        scpath = scalloc(game_folder.len + 11, sizeof(char)); //10 for the script name, 1 for 0
 
         pstrcpy(scpath, game_folder.ptr);
     }
