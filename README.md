@@ -16,14 +16,19 @@ Folder structure of .gamingtool:
 ```bash
 ├── config
 ├── game
-│   ├── game1
-│   │   ├── config
-│   │   ├── postlaunch
-│   │   └── prelaunch
+│   └── game1
+│       ├── config
+│       ├── postlaunch
+│       └── prelaunch
+├── log
+│   └── game1
+│       └── 2021-12-19 02:46:15.txt
 └── wine
     └── version1
 ```
 
 Name/Version of a game/wine is it's folder name.
 
-The config file is json encoded, example available in /extra/game/example/
+The main config file contains two literals, "log" and "debug", "log" enables logging the output of the game to a file with the current date as it's name, "debug" enables the logging of program info, output of both scripts and game to the console
+
+The game config files are json encoded, an example is available in /extra/game/example/

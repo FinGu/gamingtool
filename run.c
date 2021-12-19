@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <fcntl.h>
 #include <unistd.h>
+#include <sys/stat.h>
 
 #include "run.h"
 #include "utils.h"
@@ -12,7 +14,7 @@
 
 gt_error find_wine(string*, string, char*);
 
-gt_error game_process_run(game_config*, string, int);
+gt_error game_process_run(game_config*, string, char*, bool);
 
 gt_error run(config* cfg, string folder, string game){
     gt_error err = ok;
@@ -25,11 +27,11 @@ gt_error run(config* cfg, string folder, string game){
  
     err = run_game(cfg, &gamecfg, game_folder, folder);
 
-    free(game_folder.ptr);
+    sfree(game_folder);
 
-    out: 
     free_game_config(&gamecfg);
 
+    out: 
     return err;
 }
 
@@ -56,7 +58,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
     pstrcat(cout.ptr, "wine");
 
-    if(can_access(cout.ptr, S_IXUSR)){
+    if(can_access(cout.ptr, 0)){
         goto out;
     } 
     
@@ -64,7 +66,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
     pstrcat(cout.ptr, "bin/wine");
 
-    if (can_access(cout.ptr, S_IXUSR)){
+    if (can_access(cout.ptr, 0)){
         goto out;
     }
 
@@ -82,7 +84,12 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
 gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string folder){
     gt_error err = ok, serr = ok;
-    char *scpath = NULL;
+    char *scpath, *logpath, namebuf[40];
+
+    time_t timenow;
+    struct tm* timeinfo;
+
+    scpath = logpath = NULL;
 
     //TODO: support bash aliases?
     if(!can_access(gamecfg->path, 0)){ 
@@ -97,44 +104,73 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     }
     
     if(gamecfg->scripts.prelaunch){
-        if(cfg->log){
+        if(cfg->debug){
             puts(PREFIX"Running the prelaunch script");
         }
 
         pstrcat(scpath, "prelaunch");
 
-        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, cfg->log) : failed_to_execute); 
+        serr = (can_access(scpath, 0) ? prun(scpath, NULL, cfg->debug) : failed_to_execute); 
 
         memset(&scpath[game_folder.len], 0, 9); // clears prelaunch
 
-        if(cfg->log && serr){
+        if(cfg->debug && serr){
             puts(PREFIX"Failed to run the prelaunch script with error: ");
             print_error(serr);
         } 
     }
 
-    if(cfg->log){
-        printf(PREFIX"Running game %s\n", gamecfg->name);
+    if(cfg->log){ //only game specific output should be logged
+        if(cfg->debug){
+            puts(PREFIX"Logging is enabled");
+        }
 
-        if(gamecfg->wine.version){
-            puts(PREFIX"Wine is enabled");
+        logpath = scalloc(game_folder.len + 31, sizeof(char)); //30 for the name of the file, 1 for the term
+
+        sprintf(logpath, "%slog/%s/", folder.ptr, gamecfg->name);
+
+        serr = (!can_access(logpath, S_IFDIR) && !__mkdir(logpath)) ? failed_to_create_dir : ok;
+
+        timenow = time(NULL);
+
+        timeinfo = localtime(&timenow);
+
+        strftime(namebuf, 30, "%Y-%m-%d %H:%M:%S.txt", timeinfo);
+
+        pstrcat(logpath, namebuf);
+
+        if(serr){
+            if(cfg->debug){
+                puts(PREFIX"Error while making the log folder");
+                print_error(serr);
+            }
+            free(logpath);
+            logpath = NULL;
         }
     }
 
-    err = game_process_run(gamecfg, folder, cfg->log);
+    if(cfg->debug){
+        if(gamecfg->wine.version){
+            puts(PREFIX"Wine is enabled");
+        }
+
+        printf(PREFIX"Running game %s\n", gamecfg->name);
+    }
+
+    err = game_process_run(gamecfg, folder, logpath, cfg->debug);
 
     if(gamecfg->scripts.postlaunch) {
-        if(cfg->log){
+        if(cfg->debug){
             puts(PREFIX"Running the postlaunch script");
         }
 
         pstrcat(scpath, "postlaunch");
 
-        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, cfg->log) : failed_to_execute);
+        serr = (can_access(scpath, 0) ? prun(scpath, NULL, cfg->debug) : failed_to_execute);
 
         //no need to clear postlaunch
 
-        if(cfg->log && serr){
+        if(cfg->debug && serr){
             puts(PREFIX"Failed to run the prelaunch script");
             print_error(serr);
         } 
@@ -142,11 +178,12 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
     out:
     free(scpath);
+    free(logpath);
 
     return err;
 }
 
-gt_error game_process_run(game_config *gamecfg, string folder, int log){
+gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, bool log_to_stdout){
     gt_error err = ok;
 
     size_t clen = 10 + 1, plen = strlen(gamecfg->path), tidx; //10 for the full command, 1 for 0
@@ -191,13 +228,13 @@ gt_error game_process_run(game_config *gamecfg, string folder, int log){
         sprintf(cmd, "./'%s' '%s'", a.ptr, b.ptr);
     }
 
-    err = prun(cmd, log);
+    err = prun(cmd, log_path, log_to_stdout);
 
-    free(a.ptr);
-    free(b.ptr);
-    free(c.ptr);
+    sfree(a);
+    sfree(b);
+    sfree(c);
 
-    free(winepath.ptr);
+    sfree(winepath);
     free(cmd);
 
     out:

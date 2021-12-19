@@ -10,16 +10,20 @@
 #include "filesys.h"
 #include "utils.h"
 
-int can_access(char *file, int perm){
+bool __mkdir(char *path){
+    return mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO) == 0;
+}
+
+bool can_access(char *file, int perm){
     struct stat s;
 
     int exists = lstat(file, &s) == 0;
     
     if(exists && (perm == 0 || (s.st_mode & perm))) {
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 gt_error read_write_file(int mode, size_t size, char *buf, char *file_location){
@@ -132,20 +136,26 @@ gt_error get_create_folder(string *out){
     pstrcat(folder.ptr, "/");
 
     if(!can_access(folder.ptr, S_IFDIR)){
-        if(mkdir(folder.ptr, S_IRWXU | S_IRWXG | S_IRWXO) == -1){
+        if(!__mkdir(folder.ptr)){
             err = failed_to_create_dir;
             goto out;
         }
 
         nfolder = copycatalloc(slen + 4, folder.ptr, "game"); // + 4 for the subfolder name
 
-        mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO); //shouldn't fail
+        __mkdir(nfolder); //shouldn't fail
 
         memset(&nfolder[slen], 0, 4); //clears game
 
         pstrcat(nfolder, "wine");
 
-        mkdir(nfolder, S_IRWXU | S_IRWXG | S_IRWXO);
+        __mkdir(nfolder);
+
+        memset(&nfolder[slen], 0, 4); //clears wine
+
+        pstrcat(nfolder, "log");
+
+        __mkdir(nfolder);
 
         free(nfolder);
     }

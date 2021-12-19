@@ -1,12 +1,12 @@
 #include "config.h"
 
-#define BUFSIZE 2048
+#define BUFSIZE 1024 
 
 string get_file_from_path(string); 
 
 void escapeshellargs(string*, string); 
 
-gt_error prun(char*, int log);
+gt_error prun(char*, char*, bool log);
 
 void pstrcat(char*, char*);
 

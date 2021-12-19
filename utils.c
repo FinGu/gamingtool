@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <unistd.h>
 #include <fcntl.h>
 
 #include "utils.h"
+#include "filesys.h"
 
 string get_file_from_path(string in){
     size_t i;
@@ -52,25 +54,40 @@ void escapeshellargs(string* out, string in){
     *out = buf;
 }
 
-gt_error prun(char* process, int log){
-    char buf[BUFSIZE];
-    FILE* file = popen(process, "r");
-    
-    if(!file){
-        return failed_to_start;
+gt_error prun(char *process, char *log_file, bool log_to_stdout){
+    int fd = -1;
+    gt_error err = ok;
+
+    FILE *prfile = popen(process, "r");
+
+    char buf[BUFSIZE] = {0};
+
+    if(!prfile){
+        err = failed_to_start;
+        goto out;
     }
 
-    if(log){
-        while(fgets(buf, BUFSIZE, file)){
+    if(log_file && (fd = open(log_file, O_CREAT | O_APPEND | O_WRONLY, S_IRWXU)) == -1){
+        err = failed_to_open;
+        goto out;
+    }
+    
+    
+    while(fgets(buf, BUFSIZE, prfile)){
+        if(log_to_stdout){
             puts(buf);
         }
-    } else{
-        while(fgets(buf, BUFSIZE, file));
+
+        if(fd >= 0){
+            write(fd, buf, strlen(buf)); // should be buffered (strlen bad)
+        }
     }
 
-    pclose(file);
+    out:
+    close(fd);
+    pclose(prfile);
 
-    return ok;
+    return err;
 } 
 
 void *scalloc(size_t num, size_t size){ //safe calloc
@@ -95,13 +112,13 @@ void sfree(string to_free){
 }
 
 void pstrcat(char *dest, char *source){
-    int len1 = strlen(dest), len2 = strlen(source);
+    size_t len1 = strlen(dest), len2 = strlen(source);
 
     memcpy(dest + len1, source, len2 + 1);
 }
 
 void pstrcpy(char *dest, char *source){
-    int len = strlen(source);
+    size_t len = strlen(source);
 
     memcpy(dest, source, len + 1);
 }

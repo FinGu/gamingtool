@@ -40,13 +40,15 @@ gt_error get_game_config(game_config* in, string* game_folder, string folder, st
         goto out;
     }
 
-    in->name = strdup(game.ptr);
-    
     if((err = read_write_config(O_RDONLY, BUFSIZE, buf, __game_folder))){
         goto out;
     }
 
-    err = parse_game_config(in, buf);
+    if((err = parse_game_config(in, buf))){
+        goto out;
+    }
+
+    in->name = strdup(game.ptr);
 
     *game_folder = __game_folder;
     

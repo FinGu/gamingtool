@@ -8,8 +8,10 @@
 
 #include "config.h"
 #include "filesys.h"
+
 #include "run.h"
 #include "list.h"
+#include "info.h"
 
 void usage(void);
 
@@ -42,6 +44,8 @@ int main(int argc, char **argv){
         err = ((strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0) 
                 ? list(folder, argh.ptr) 
                 : invalid_input);
+    } else if(strcmp(argp, "info") == 0){
+        err = info(&cfg, folder, argh);
     }
 
     out:

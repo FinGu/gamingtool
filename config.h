@@ -2,6 +2,7 @@
 #define GT_CFG
 
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "errors.h"
 
@@ -19,7 +20,8 @@ typedef struct {
 } string;
 
 typedef struct {
-    int log;
+    bool log; //log game output into files
+    bool debug; //log debugging info and output of scripts to stdout
 } config;
 
 struct __game_wine{
@@ -27,8 +29,8 @@ struct __game_wine{
 };
 
 struct __game_scripts{
-    int prelaunch; //prelaunch (in the game folder)
-    int postlaunch; //postlaunch (in the game folder)
+    bool prelaunch; //prelaunch (in the game folder)
+    bool postlaunch; //postlaunch (in the game folder)
 };
 
 typedef struct {

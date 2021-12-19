@@ -22,7 +22,7 @@ gt_error create_parser(cJSON **out, char *data){
 
 gt_error create_config(string* data){
     char *buf;
-    cJSON *config = cJSON_CreateObject(), *log;
+    cJSON *config = cJSON_CreateObject(), *obj;
     gt_error err = ok;
 
     if(!config){
@@ -30,9 +30,11 @@ gt_error create_config(string* data){
         goto out;
     }
 
-    log = cJSON_CreateBool(0);
+    obj = cJSON_CreateBool(0);
 
-    cJSON_AddItemToObject(config, "log", log);
+    cJSON_AddItemToObject(config, "log", obj);
+
+    cJSON_AddItemToObject(config, "debug", obj);
 
     buf = cJSON_Print(config);
 
@@ -66,6 +68,15 @@ gt_error parse_config(config *out, char *data){
     }
 
     out->log = handle->valueint;
+
+    handle = cJSON_GetObjectItem(config, "debug");
+
+    if(!cJSON_IsBool(handle)){
+        err = failed_to_parse;
+        goto out;
+    }
+
+    out->debug = handle->valueint;
 
     out:
     cJSON_Delete(config);

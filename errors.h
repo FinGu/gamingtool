@@ -21,6 +21,7 @@ typedef enum {
     game_not_found,
     couldnt_find_wine,
     failed_to_start,
+    process_returned_error
     //run ends
 
 } gt_error;

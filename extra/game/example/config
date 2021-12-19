@@ -7,5 +7,5 @@
  "scripts":{
  "prelaunch": true, 
  "postlaunch": true 
-}
+ }
 } 

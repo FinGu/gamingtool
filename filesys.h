@@ -1,6 +1,8 @@
 #include "config.h"
 
-int can_access(char*, int);
+bool can_access(char*, int);
+
+bool __mkdir(char*);
 
 gt_error read_write_file(int, size_t, char*, char*);
 
