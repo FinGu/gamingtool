@@ -1,4 +1,4 @@
-project('gamingtool', 'c')
+project('gamingtool', 'c', default_options: ['optimization=3'])
 
 jsondep = dependency('cJSON')
 
