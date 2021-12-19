@@ -19,8 +19,7 @@ void print_error(gt_error error){
         {cjson_failure, "cJSON failed, report this"},
         {game_not_found, "The game path couldn't be accessed"}, 
         {couldnt_find_wine, "Couldn't find the wine version"},
-        {failed_to_start, "Failed to start process"},
-        {process_returned_error, "Process returned an error"}
+        {failed_to_start, "Failed to start process"}
     };
 
     printf(PREFIX"%s\n", err_table[error].msg);
