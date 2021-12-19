@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -71,7 +70,6 @@ gt_error prun(char *process, char *log_file, bool log_to_stdout){
         err = failed_to_open;
         goto out;
     }
-    
     
     while(fgets(buf, BUFSIZE, prfile)){
         if(log_to_stdout){

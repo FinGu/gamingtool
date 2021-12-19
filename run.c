@@ -58,7 +58,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
     pstrcat(cout.ptr, "wine");
 
-    if(can_access(cout.ptr, 0)){
+    if(can_access(cout.ptr, S_IXUSR)){
         goto out;
     } 
     
@@ -66,7 +66,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
     pstrcat(cout.ptr, "bin/wine");
 
-    if (can_access(cout.ptr, 0)){
+    if (can_access(cout.ptr, S_IXUSR)){
         goto out;
     }
 
@@ -110,7 +110,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
         pstrcat(scpath, "prelaunch");
 
-        serr = (can_access(scpath, 0) ? prun(scpath, NULL, cfg->debug) : failed_to_execute); 
+        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, NULL, cfg->debug) : failed_to_execute); 
 
         memset(&scpath[game_folder.len], 0, 9); // clears prelaunch
 
@@ -131,21 +131,21 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
         serr = (!can_access(logpath, S_IFDIR) && !__mkdir(logpath)) ? failed_to_create_dir : ok;
 
-        timenow = time(NULL);
-
-        timeinfo = localtime(&timenow);
-
-        strftime(namebuf, 30, "%Y-%m-%d %H:%M:%S.txt", timeinfo);
-
-        pstrcat(logpath, namebuf);
-
         if(serr){
             if(cfg->debug){
                 puts(PREFIX"Error while making the log folder");
                 print_error(serr);
             }
             free(logpath);
-            logpath = NULL;
+            logpath = NULL; 
+        } else{
+            timenow = time(NULL);
+
+            timeinfo = localtime(&timenow);
+
+            strftime(namebuf, 30, "%Y-%m-%d %H:%M:%S.txt", timeinfo);
+
+            pstrcat(logpath, namebuf);
         }
     }
 
@@ -166,7 +166,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
         pstrcat(scpath, "postlaunch");
 
-        serr = (can_access(scpath, 0) ? prun(scpath, NULL, cfg->debug) : failed_to_execute);
+        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, NULL, cfg->debug) : failed_to_execute);
 
         //no need to clear postlaunch
 
