@@ -40,12 +40,14 @@ int main(int argc, char **argv){
 
     if(strcmp(argp, "run") == 0) {
         err = run(&cfg, folder, argh);
-    } else if(strcmp(argp, "list") == 0){
+    } 
+    else if(strcmp(argp, "info") == 0){
+        err = info(&cfg, folder, argh);
+    }
+    else if(strcmp(argp, "list") == 0){
         err = ((strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0) 
                 ? list(folder, argh.ptr) 
                 : invalid_input);
-    } else if(strcmp(argp, "info") == 0){
-        err = info(&cfg, folder, argh);
     }
 
     out:
@@ -59,5 +61,5 @@ int main(int argc, char **argv){
 }
 
 void usage(){
-    puts(PREFIX"available options:\nrun <game>\nlist <wine or game>");
+    puts(PREFIX"available options:\nrun <game>\ninfo <game>\nlist <wine or game>");
 }
