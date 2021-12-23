@@ -191,14 +191,14 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, bool log_to_stdout){
     gt_error err = ok;
 
-    size_t clen, plen = strlen(gamecfg->path), tidx; //4 for the full command, 1 for 0
+    size_t proglen, pathlen = strlen(gamecfg->path), tidx; //4 for the full command, 1 for 0
 
-    char *cmd = NULL;
+    char *program = NULL;
     string executable, winepath = (string){0, NULL};
 
     struct __args *arguments = &gamecfg->arguments;
 
-    executable = get_file_from_path((string){plen, gamecfg->path});
+    executable = get_file_from_path((string){pathlen, gamecfg->path});
 
     arguments = &gamecfg->arguments; 
 
@@ -206,7 +206,7 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
         goto out;
     }
     
-    tidx = plen - executable.len - 1;
+    tidx = pathlen - executable.len - 1;
 
     gamecfg->path[tidx] = '\0'; // sets the last slash to a 0 to get the folder path without the executable
 
@@ -214,27 +214,20 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
 
     gamecfg->path[tidx] = '/'; // sets the original value back, for debugging purposes
 
-    clen = executable.len;
-    
+    proglen = executable.len + 2; // size of first str = 2
+
+    program = copycatalloc(proglen, "./", executable.ptr);
+
     if(gamecfg->wine.version){
-        clen += winepath.len + 3; // full command = 3
+        arguments->ptr[0] = program; // pass program as an arg to wine
 
-        cmd = copycatalloc(clen, winepath.ptr, " ./");
-
-        strcat(cmd, executable.ptr);
-
-        //we want 'wine {program} {args}'
-        //not 'wine {args} {program}
+        err = prun(winepath.ptr, arguments, log_path, log_to_stdout); // run wine
     } else {
-        clen += 2; //full command = 2
-
-        cmd = copycatalloc(clen, "./", executable.ptr);
+        err = prun(program, arguments, log_path, log_to_stdout);
     }
 
-    err = prun(cmd, arguments, log_path, log_to_stdout);
-
     sfree(winepath);
-    free(cmd);
+    free(program);
 
     out:
     return err; 

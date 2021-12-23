@@ -94,6 +94,8 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
         dup2(spipe[1], STDOUT_FILENO);
 
         execv(inargs[0], inargs);
+
+        _exit(0);
     } else{
         close(spipe[1]);
 
