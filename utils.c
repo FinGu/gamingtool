@@ -123,7 +123,7 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
             }
 
             if(log_file){
-                write(fd, buf, BUFSIZE); // should be buffered
+                write(fd, buf, sz); // should be buffered
             }
         }
 
