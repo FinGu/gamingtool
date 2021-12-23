@@ -222,6 +222,9 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
         cmd = copycatalloc(clen, winepath.ptr, " ./");
 
         strcat(cmd, executable.ptr);
+
+        //we want 'wine {program} {args}'
+        //not 'wine {args} {program}
     } else {
         clen += 2; //full command = 2
 
