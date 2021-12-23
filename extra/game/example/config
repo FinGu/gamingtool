@@ -1,6 +1,6 @@
 {
- "path": "/usr/bin/echo"
- "arguments": "Hello World",
+ "path": "/usr/bin/echo",
+ "arguments": ["Hello World"],
  "wine": {
  "version": ""
  },

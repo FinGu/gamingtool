@@ -4,8 +4,7 @@
 #include <stdlib.h>
 
 #include "parse.h"
-#include "utils.h"
-#include "filesys.h"
+#include "alloc.h"
 
 //to be used somewhere else later
 gt_error create_parser(cJSON **out, char *data){
@@ -88,6 +87,7 @@ gt_error parse_config(config *out, char *data){
 gt_error parse_game_config(game_config *out, char *data){
     gt_error err = ok;
     cJSON *config, *handle, *in;
+    int tmp;
 
     config = handle = in = NULL;
 
@@ -108,9 +108,20 @@ gt_error parse_game_config(game_config *out, char *data){
     //the path of the game is necessary 
 
     handle = cJSON_GetObjectItem(config, "arguments");
+    
+    if((tmp = cJSON_GetArraySize(handle))){
+        out->arguments = (struct __args){tmp, scalloc(tmp, sizeof(char*))};
+        
+        tmp = 0;
+        
+        cJSON_ArrayForEach(in, handle)
+        {
+            if(!cJSON_IsString(in)){
+                continue;
+            }
 
-    if(cJSON_IsString(handle)){
-        out->arguments = strdup(handle->valuestring);
+            out->arguments.ptr[tmp++] = strdup(in->valuestring);
+        }
     }
 
     handle = cJSON_GetObjectItem(config, "wine");
@@ -142,8 +153,16 @@ gt_error parse_game_config(game_config *out, char *data){
 }
 
 void free_game_config(game_config *to_free){
+    int i;
+
     free(to_free->name);
     free(to_free->path);
-    free(to_free->arguments);
+
+    for(i = 0; i < to_free->arguments.size; ++i){
+        free(to_free->arguments.ptr[i]);
+    }
+
+    free(to_free->arguments.ptr);
+
     free(to_free->wine.version);
 }

@@ -8,6 +8,7 @@
 #include <dirent.h>
 
 #include "filesys.h"
+#include "alloc.h"
 #include "utils.h"
 
 bool __mkdir(char *path){
@@ -133,7 +134,7 @@ gt_error get_create_folder(string *out){
 
     copycat(folder.ptr, home, DIRNAME);
     
-    pstrcat(folder.ptr, "/");
+    strcat(folder.ptr, "/");
 
     if(!can_access(folder.ptr, S_IFDIR)){
         if(!__mkdir(folder.ptr)){
@@ -147,13 +148,13 @@ gt_error get_create_folder(string *out){
 
         memset(&nfolder[slen], 0, 4); //clears game
 
-        pstrcat(nfolder, "wine");
+        strcat(nfolder, "wine");
 
         __mkdir(nfolder);
 
         memset(&nfolder[slen], 0, 4); //clears wine
 
-        pstrcat(nfolder, "log");
+        strcat(nfolder, "log");
 
         __mkdir(nfolder);
 

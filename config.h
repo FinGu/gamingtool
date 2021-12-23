@@ -24,6 +24,11 @@ typedef struct {
     bool debug; //log debugging info and output of scripts to stdout
 } config;
 
+struct __args {
+    int size;
+    char **ptr;
+};
+
 struct __game_wine{
     char *version;
 };
@@ -36,7 +41,7 @@ struct __game_scripts{
 typedef struct {
     char *name; //this var is the name of the game's folder
     char *path;
-    char *arguments;
+    struct __args arguments;
     struct __game_wine wine;
     struct __game_scripts scripts;
 } game_config;

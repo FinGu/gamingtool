@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #include "list.h"
-#include "utils.h"
+#include "alloc.h"
 #include "filesys.h"
 
 gt_error list(string folder, char *arg){

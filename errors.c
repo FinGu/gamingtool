@@ -1,4 +1,5 @@
 #include <stdio.h>
+
 #include "config.h"
 
 void print_error(gt_error error){

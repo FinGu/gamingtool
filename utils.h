@@ -2,22 +2,17 @@
 
 #define BUFSIZE 1024 
 
+/* typedef struct {
+    size_t size;
+    char **ptr;
+} __split_out;
+
+__split_out split(char, string);
+
+void freesplit(__split_out); */
+
 string get_file_from_path(string); 
 
-void escapeshellargs(string*, string); 
-
-gt_error prun(char*, char*, bool log);
-
-void pstrcat(char*, char*);
-
-void pstrcpy(char*, char*);
+gt_error prun(char*, struct __args*, char*, bool); 
 
 void copycat(char*, char*, char*); 
-
-void *scalloc(size_t, size_t); //safe calloc
-
-string salloc(size_t); //string alloc
-
-void sfree(string); //string free
-
-char *copycatalloc(size_t, char*, char*);

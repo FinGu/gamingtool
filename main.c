@@ -4,9 +4,6 @@
 
 #include <fcntl.h>
 
-#include "parse.h"
-
-#include "config.h"
 #include "filesys.h"
 
 #include "run.h"

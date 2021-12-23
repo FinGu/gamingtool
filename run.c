@@ -3,12 +3,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
 #include "run.h"
 #include "utils.h"
+#include "alloc.h"
 #include "filesys.h"
 #include "parse.h"
 
@@ -45,7 +45,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
         goto out;
     }
 
-    len = folder.len + strlen(wine) + 14; //5 for wine/, 9 for /bin/wine, 1 for 0
+    len = folder.len + strlen(wine) + 14; //5 for wine/, 9 for /bin/wine
 
     cout = salloc(len);
 
@@ -56,7 +56,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
         goto out;
     }
 
-    pstrcat(cout.ptr, "wine");
+    strcat(cout.ptr, "wine");
 
     if(can_access(cout.ptr, S_IXUSR)){
         goto out;
@@ -64,7 +64,7 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
     
     memset(&cout.ptr[len-8], 0, 4); //clears only wine
 
-    pstrcat(cout.ptr, "bin/wine");
+    strcat(cout.ptr, "bin/wine");
 
     if (can_access(cout.ptr, S_IXUSR)){
         goto out;
@@ -100,7 +100,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     if(gamecfg->scripts.prelaunch || gamecfg->scripts.postlaunch){
         scpath = scalloc(game_folder.len + 11, sizeof(char)); //10 for the script name, 1 for 0
 
-        pstrcpy(scpath, game_folder.ptr);
+        strcpy(scpath, game_folder.ptr);
     }
     
     if(gamecfg->scripts.prelaunch){
@@ -108,9 +108,9 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Running the prelaunch script");
         }
 
-        pstrcat(scpath, "prelaunch");
+        strcat(scpath, "prelaunch");
 
-        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, NULL, cfg->debug) : failed_to_execute); 
+        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, NULL, NULL, cfg->debug) : failed_to_execute); 
 
         memset(&scpath[game_folder.len], 0, 9); // clears prelaunch
 
@@ -136,6 +136,11 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
                 puts(PREFIX"Error while making the log folder");
                 print_error(serr);
             }
+
+            //get_file_from_path()
+            //len - ffplen - 1
+            //__mkdir();
+
             free(logpath);
             logpath = NULL; 
         } else{
@@ -145,7 +150,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
             strftime(namebuf, 30, "%Y-%m-%d %H:%M:%S.txt", timeinfo);
 
-            pstrcat(logpath, namebuf);
+            strcat(logpath, namebuf);
         }
     }
 
@@ -164,9 +169,9 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Running the postlaunch script");
         }
 
-        pstrcat(scpath, "postlaunch");
+        strcat(scpath, "postlaunch");
 
-        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, NULL, cfg->debug) : failed_to_execute);
+        serr = (can_access(scpath, S_IXUSR) ? prun(scpath, NULL, NULL, cfg->debug) : failed_to_execute);
 
         //no need to clear postlaunch
 
@@ -186,17 +191,16 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, bool log_to_stdout){
     gt_error err = ok;
 
-    size_t clen = 10 + 1, plen = strlen(gamecfg->path), tidx; //10 for the full command, 1 for 0
+    size_t clen, plen = strlen(gamecfg->path), tidx; //4 for the full command, 1 for 0
+
     char *cmd = NULL;
+    string executable, winepath = (string){0, NULL};
 
-    string executable, arguments;
-    string winepath, a, b, c;
-
-    winepath = a = b = c = (string){0, NULL};
+    struct __args *arguments = &gamecfg->arguments;
 
     executable = get_file_from_path((string){plen, gamecfg->path});
 
-    arguments = ((gamecfg->arguments) ? (string){strlen(gamecfg->arguments), gamecfg->arguments} : c);
+    arguments = &gamecfg->arguments; 
 
     if(gamecfg->wine.version && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
         goto out;
@@ -207,32 +211,24 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
     gamecfg->path[tidx] = '\0'; // sets the last slash to a 0 to get the folder path without the executable
 
     chdir(gamecfg->path);
-    
+
     gamecfg->path[tidx] = '/'; // sets the original value back, for debugging purposes
 
-    escapeshellargs(&a, executable);
-
-    escapeshellargs(&b, arguments);
-
-    clen += a.len + b.len;
+    clen = executable.len;
     
     if(gamecfg->wine.version){
-        escapeshellargs(&c, winepath); 
+        clen += winepath.len + 3; // full command = 3
 
-        cmd = scalloc(clen + c.len, sizeof(char));
+        cmd = copycatalloc(clen, winepath.ptr, " ./");
 
-        sprintf(cmd, "'%s' ./'%s' '%s'", c.ptr, a.ptr, b.ptr); //convenient
+        strcat(cmd, executable.ptr);
     } else {
-        cmd = scalloc(clen, sizeof(char));
+        clen += 2; //full command = 2
 
-        sprintf(cmd, "./'%s' '%s'", a.ptr, b.ptr);
+        cmd = copycatalloc(clen, "./", executable.ptr);
     }
 
-    err = prun(cmd, log_path, log_to_stdout);
-
-    sfree(a);
-    sfree(b);
-    sfree(c);
+    err = prun(cmd, arguments, log_path, log_to_stdout);
 
     sfree(winepath);
     free(cmd);
