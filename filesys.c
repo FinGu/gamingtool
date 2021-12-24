@@ -74,6 +74,7 @@ gt_error read_config(size_t bufsize, char *buf, string folder){
 
     out:
     free(location);
+    close(fd);
 
     return err; 
 }
