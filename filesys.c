@@ -12,7 +12,7 @@
 #include "utils.h"
 
 bool __mkdir(char *path){
-    return mkdir(path, S_IRWXU | S_IRWXG | S_IRWXO) == 0;
+    return mkdir(path, S_IRWXU | S_IRGRP) == 0;
 }
 
 bool can_access(char *file, int perm){
@@ -25,35 +25,6 @@ bool can_access(char *file, int perm){
     }
 
     return false;
-}
-
-gt_error read_write_file(int mode, size_t size, char *buf, char *file_location){
-    gt_error err = ok;
-    int i, file;
-
-    //O_WRONLY = 1
-    //O_RDONLY = 0 
-
-    file = open(file_location, mode);
-
-    if(file == -1) {
-        err = failed_to_open;
-        goto out;
-    }
-
-    i = ((mode) ? write(file, buf, size) : read(file, buf, size));
-
-    if(i <= 0){
-        err = failed_to_read;
-        goto out;
-    }
-
-    buf[size] = '\0';
-
-    out:
-    close(file);
-
-    return err;
 }
 
 gt_error print_files_in_folder(char *folder){
@@ -80,14 +51,28 @@ gt_error print_files_in_folder(char *folder){
     return ok;
 }
 
-gt_error read_write_config(int mode, size_t bufsize, char *buf, string folder){ 
+gt_error read_config(size_t bufsize, char *buf, string folder){ 
+    int fd;
     gt_error err = ok;
     size_t nlen = folder.len + 6; //6 for config
 
     char *location = copycatalloc(nlen, folder.ptr, "config");
 
-    err = read_write_file(mode, bufsize, buf, location);
+    fd = open(location, O_RDONLY, FILE_PERM);
+    
+    if(fd == -1){
+        err = failed_to_open;
+        goto out;
+    }
 
+    if(read(fd, buf, bufsize) <= 0){
+        err = failed_to_read;
+        goto out;
+    }
+
+    buf[bufsize-1] = '\0';
+
+    out:
     free(location);
 
     return err; 
@@ -102,7 +87,7 @@ gt_error get_game_folder(string *out, string folder, string game){
 
     sprintf(cout.ptr, "%sgame/%s/", folder.ptr, game.ptr);
 
-    if(!can_access(cout.ptr, S_IFDIR)){ //probably should remove this as read_write_file does this job
+    if(!can_access(cout.ptr, S_IFDIR)){ 
         err = failed_to_open;
         goto out;
     }

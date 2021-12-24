@@ -29,9 +29,11 @@ gt_error create_config(string* data){
         goto out;
     }
 
-    obj = cJSON_CreateBool(0);
+    obj = cJSON_CreateBool(false);
 
     cJSON_AddItemToObject(config, "log", obj);
+
+    obj = cJSON_CreateBool(false);
 
     cJSON_AddItemToObject(config, "debug", obj);
 
@@ -39,6 +41,7 @@ gt_error create_config(string* data){
 
     if(!buf){
         err = cjson_failure;
+        goto out;
     }
 
     *data = (string){strlen(buf), buf};

@@ -23,11 +23,13 @@ gt_error info(config *cfg, string folder, string game){
         "    arguments: ", gamecfg.name, gamecfg.path
     );
 
-    if(gamecfg.arguments.size){
-        sz = gamecfg.arguments.size;
+    i = gamecfg.wine.version != NULL;
 
-        for(i = 0; i < sz; ++i){
-            printf( ((i == sz-1) ? "%s\n" : "%s, "), gamecfg.arguments.ptr[i]);
+    sz = gamecfg.arguments.size;
+
+    if(sz && !(sz == 1 && i)){
+        for(; i < sz; ++i){
+            printf( ((i == sz-1) ? "%s\n" : "%s, "), OR_NULL(gamecfg.arguments.ptr[i]));
         }
     } else {
         puts(OR_NULL(NULL));

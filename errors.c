@@ -10,7 +10,7 @@ void print_error(gt_error error){
     struct { gt_error err; char* msg; } err_table[] = {
         {ok, NULL},
         {invalid_input, "Invalid input"},
-        {failed_to_open, "Failed to open the file"},
+        {failed_to_open, "Failed to open the file/dir"},
         {failed_to_read, "Failed to read the file"},
         {failed_to_write, "Failed to write to the file"},
         {failed_to_create_dir, "Failed to create directories"},

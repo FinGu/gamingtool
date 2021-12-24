@@ -99,7 +99,7 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
     } else{
         close(spipe[1]);
 
-        fd = ((log_file) ? open(log_file, O_CREAT | O_APPEND | O_WRONLY, S_IRWXU) : fd);
+        fd = ((log_file) ? open(log_file, O_CREAT | O_APPEND | O_WRONLY, FILE_PERM) : fd);
 
         if(fd == -1){
             err = failed_to_open;
