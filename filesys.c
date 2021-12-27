@@ -1,6 +1,6 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <sys/stat.h>
 #include <fcntl.h> 
@@ -8,7 +8,6 @@
 #include <dirent.h>
 
 #include "filesys.h"
-#include "alloc.h"
 #include "utils.h"
 
 bool __mkdir(char *path){
@@ -56,9 +55,13 @@ gt_error read_config(size_t bufsize, char *buf, string folder){
     gt_error err = ok;
     size_t nlen = folder.len + 6; //6 for config
 
-    char *location = copycatalloc(nlen, folder.ptr, "config");
+    string location = str_alloc(nlen);
 
-    fd = open(location, O_RDONLY, FILE_PERM);
+    str_append_s(&location, folder);
+
+    str_append_p(&location, 6, "config");
+
+    fd = open(str_raw_p(&location), O_RDONLY, FILE_PERM);
     
     if(fd == -1){
         err = failed_to_open;
@@ -73,7 +76,7 @@ gt_error read_config(size_t bufsize, char *buf, string folder){
     buf[bufsize-1] = '\0';
 
     out:
-    free(location);
+    str_free(&location);
     close(fd);
 
     return err; 
@@ -84,9 +87,15 @@ gt_error get_game_folder(string *out, string folder, string game){
     string cout;
     size_t nlen = folder.len + 6 + game.len; // 6 for game//
     
-    cout = salloc(nlen);
+    cout = str_alloc(nlen);
 
-    sprintf(cout.ptr, "%sgame/%s/", folder.ptr, game.ptr);
+    str_append_s(&cout, folder);
+
+    str_append_p(&cout, 5, "game/");
+
+    str_append_s(&cout, game);
+
+    str_append_p(&cout, 1, "/");
 
     if(!can_access(cout.ptr, S_IFDIR)){ 
         err = failed_to_open;
@@ -97,7 +106,7 @@ gt_error get_game_folder(string *out, string folder, string game){
 
     out:
     if(err){
-        sfree(cout);
+        str_free(&cout);
     }
 
     return err;
@@ -105,22 +114,28 @@ gt_error get_game_folder(string *out, string folder, string game){
 
 gt_error get_create_folder(string *out){
     gt_error err = ok;
-    char *home = getenv("HOME"), *nfolder;
-    string folder;
-    size_t slen;
+    char *home = getenv("HOME"), *tmpp;
+    string folder, nfolder;
+    size_t hlen, dlen, slen;
 
     if(!home){
         err = home_not_found;
         goto out;
     }
 
-    slen = strlen(home) + NSIZE + 3; //+1 for . and +2 for /
+    hlen = strlen(home);
 
-    folder = salloc(slen);
+    dlen = NSIZE + 2; //+1 for / and +1 for .
 
-    copycat(folder.ptr, home, DIRNAME);
-    
-    strcat(folder.ptr, "/");
+    slen = hlen + dlen; 
+
+    folder = str_alloc(slen);
+
+    str_append_p(&folder, hlen, home);
+
+    str_append_p(&folder, dlen, DIRNAME);
+
+    str_append_p(&folder, 1, "/");
 
     if(!can_access(folder.ptr, S_IFDIR)){
         if(!__mkdir(folder.ptr)){
@@ -128,30 +143,36 @@ gt_error get_create_folder(string *out){
             goto out;
         }
 
-        nfolder = copycatalloc(slen + 4, folder.ptr, "game"); // + 4 for the subfolder name
+        nfolder = str_alloc(slen + 4); //+4 for the subfolder name
 
-        __mkdir(nfolder); //shouldn't fail
+        str_append_s(&nfolder, folder);
 
-        memset(&nfolder[slen], 0, 4); //clears game
+        str_append_p(&nfolder, 4, "game"); 
 
-        strcat(nfolder, "wine");
+        tmpp = str_raw_p(&nfolder); //this pointer shouldnt change as in this context realloc isnt called
 
-        __mkdir(nfolder);
+        __mkdir(tmpp); //shouldn't fail
 
-        memset(&nfolder[slen], 0, 4); //clears wine
+        str_clear(&nfolder, 4); //clears game
 
-        strcat(nfolder, "log");
+        str_append_p(&nfolder, 4, "wine");
 
-        __mkdir(nfolder);
+        __mkdir(tmpp);
+        
+        str_clear(&nfolder, 4); //clears wine
 
-        free(nfolder);
+        str_append_p(&nfolder, 3, "log");
+
+        __mkdir(tmpp);
+
+        str_free(&nfolder);
     }
 
     *out = folder;
 
     out:
     if(err){
-        sfree(folder);
+        str_free(&folder);
     }
 
     return err;

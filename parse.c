@@ -4,7 +4,6 @@
 #include <stdlib.h>
 
 #include "parse.h"
-#include "alloc.h"
 
 //to be used somewhere else later
 gt_error create_parser(cJSON **out, char *data){
@@ -21,6 +20,7 @@ gt_error create_parser(cJSON **out, char *data){
 
 gt_error create_config(string* data){
     char *buf;
+    string outbuf = str_alloc(0);
     cJSON *config = cJSON_CreateObject(), *obj;
     gt_error err = ok;
 
@@ -44,7 +44,9 @@ gt_error create_config(string* data){
         goto out;
     }
 
-    *data = (string){strlen(buf), buf};
+    outbuf = (string){.len = strlen(buf), .ptr = buf};
+
+    *data = outbuf;
 
     out:
     cJSON_Delete(config);
@@ -128,7 +130,7 @@ gt_error parse_game_config(game_config *out, char *data){
     }
 
     if(sz){
-        out->arguments = (struct __args){sz, scalloc(sz, sizeof(char*))};
+        out->arguments = (struct __args){sz, calloc(sz, sizeof(char*))};
                 
         cJSON_ArrayForEach(in, handle)
         {

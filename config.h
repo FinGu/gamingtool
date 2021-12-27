@@ -1,23 +1,17 @@
 #ifndef GT_CFG
 #define GT_CFG
 
-#include <stddef.h>
-#include <stdbool.h>
+#include "str.h"
 
 #include "errors.h"
 
 #define NAME "gamingtool"
 
+#define NSIZE 10
+
 #define DIRNAME "/." NAME
 
 #define PREFIX NAME"> "
-
-#define NSIZE 10
-
-typedef struct {
-    size_t len;
-    char *ptr;
-} string;
 
 typedef struct {
     bool log; //log game output into files

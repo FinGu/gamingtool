@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 #include "info.h"
-#include "alloc.h"
+#include "config.h"
 #include "parse.h"
 
 #define AS_BOOL(x) ((x) ? "true" : "false")
@@ -11,7 +11,7 @@ gt_error info(config *cfg, string folder, string game){
     int i, sz;
     gt_error err = ok;
     game_config gamecfg = {0};
-    string game_folder = {0, NULL};
+    string game_folder = str_alloc(0);
 
     if((err = get_game_config(&gamecfg, &game_folder, folder, game))){
         goto out;
@@ -44,7 +44,7 @@ gt_error info(config *cfg, string folder, string game){
         OR_NULL(gamecfg.wine.version), AS_BOOL(gamecfg.scripts.prelaunch), AS_BOOL(gamecfg.scripts.postlaunch)
     );
 
-    sfree(game_folder);
+    str_free(&game_folder);
 
     free_game_config(&gamecfg);
 

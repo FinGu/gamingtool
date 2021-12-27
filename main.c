@@ -14,9 +14,11 @@ void usage(void);
 
 int main(int argc, char **argv){
     gt_error err = ok;
-    char *argp;
-    string folder = {0, NULL}, argh;
+    char *argp, *tmpp;
+    string folder, argh;
     config cfg = {0};
+
+    folder = argh = str_alloc(0);
 
     if(argc < 3){
         usage();
@@ -33,7 +35,7 @@ int main(int argc, char **argv){
 
     argp = argv[1];
 
-    argh = (string){strlen(argv[2]), argv[2]};
+    argh = (string){.len = strlen(argv[2]), .ptr = argv[2]};
 
     if(strcmp(argp, "run") == 0) {
         err = run(&cfg, folder, argh);
@@ -42,13 +44,15 @@ int main(int argc, char **argv){
         err = info(&cfg, folder, argh);
     }
     else if(strcmp(argp, "list") == 0){
-        err = ((strcmp(argh.ptr, "wine") == 0 || strcmp(argh.ptr, "game") == 0) 
-                ? list(folder, argh.ptr) 
+        tmpp = str_raw_p(&argh);
+
+        err = ((strcmp(tmpp, "wine") == 0 || strcmp(tmpp, "game") == 0) 
+                ? list(folder, tmpp) 
                 : invalid_input);
     }
 
     out:
-    free(folder.ptr);
+    str_free(&folder);
 
     if(err){
         print_error(err);

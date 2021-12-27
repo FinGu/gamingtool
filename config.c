@@ -1,11 +1,10 @@
 #include <fcntl.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "config.h"
 
-#include "alloc.h"
 #include "utils.h"
 #include "filesys.h"
 #include "parse.h"
@@ -13,11 +12,16 @@
 gt_error get_config(config *in, string folder){
     int fd;
     gt_error err = ok;
-    char *location = copycatalloc(folder.len + 6, folder.ptr, "config"), //6 for config
-         buf[BUFSIZE] = {0};
-    string cfg = {0, NULL};
+    char buf[BUFSIZE] = {0};
 
-    fd = open(location, O_CREAT | O_RDWR, FILE_PERM);
+    string location = str_alloc(folder.len + 6), //6 for config
+           cfg = str_alloc(0); 
+
+    str_append_s(&location, folder);
+
+    str_append_p(&location, 6, "config");
+
+    fd = open(str_raw_p(&location), O_CREAT | O_RDWR, FILE_PERM);
 
     if(fd == -1){
         err = failed_to_open;
@@ -40,8 +44,8 @@ gt_error get_config(config *in, string folder){
     err = parse_config(in, ((cfg.ptr) ? cfg.ptr : buf));
     
     out:
-    free(location);
-    free(cfg.ptr);
+    str_free(&location);
+    str_free(&cfg);
     close(fd);
 
     return err;
@@ -50,7 +54,7 @@ gt_error get_config(config *in, string folder){
 gt_error get_game_config(game_config* in, string* game_folder, string folder, string game){
     gt_error err = ok;
     char buf[BUFSIZE] = {0}; 
-    string __game_folder = {0, NULL};
+    string __game_folder = str_alloc(0);
 
     if((err = get_game_folder(&__game_folder, folder, game))){
         goto out;

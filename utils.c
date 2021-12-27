@@ -9,7 +9,6 @@
 
 #include "utils.h"
 #include "filesys.h"
-#include "alloc.h"
 
 /* __split_out split(char delim, string args){ //ghetto
     int i, n, s; 
@@ -49,14 +48,17 @@ void freesplit(__split_out in){
 string get_file_from_path(string in){
     size_t i;
     char *ptr = NULL;
+    string out = str_alloc(0);
 
     for(i = 0; i < in.len; i++){
         if(in.ptr[i] == '/'){
             ptr = &in.ptr[i+1]; //fine because in.len doesnt include the term
         }
     }
+    
+    out = (string){.len = strlen(ptr), .ptr = ptr}; //string here is used as a holder for a ptr and len, other uses like this can be found on main, parse and run
 
-    return (string){strlen(ptr), ptr};
+    return out;
 } 
 
 gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_stdout) {
@@ -71,7 +73,11 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
         sz += args->size;
     }
 
-    inargs = scalloc(sz, sizeof(char*)); //can be avoided if args == NULL
+    inargs = calloc(sz, sizeof(char*)); //can be avoided if args == NULL
+
+    if(!inargs){
+        exit(0);
+    }
 
     inargs[0] = process;
 
@@ -137,10 +143,3 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
 
     return err;
 } 
-
-
-void copycat(char *buf, char *copy, char *cat){
-    strcpy(buf, copy);
-
-    strcat(buf, cat);
-}
