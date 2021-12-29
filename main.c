@@ -49,6 +49,8 @@ int main(int argc, char **argv){
         err = ((strcmp(tmpp, "wine") == 0 || strcmp(tmpp, "game") == 0) 
                 ? list(folder, tmpp) 
                 : invalid_input);
+    } else{
+        usage();
     }
 
     out:
