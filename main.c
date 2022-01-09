@@ -20,16 +20,18 @@ int main(int argc, char **argv){
 
     folder = argh = str_alloc(0);
 
-    if(argc < 3){
-        usage();
-        goto out;
-    }
-
     if((err = get_create_folder(&folder))){
         goto out;
     } 
     
     if((err = get_config(&cfg, folder))){
+        goto out;
+    }
+
+    //create folder and config before the usage message
+
+    if(argc < 3){
+        usage();
         goto out;
     }
 
