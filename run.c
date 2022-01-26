@@ -139,13 +139,16 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Logging is enabled");
         }
 
-        logpath = str_alloc(game_folder.len + 30); //30 for the name of the file
+        logpath = str_alloc(game_folder.len-1 + 30); //30 for the name of the file
+        // len(game/xx/) == len(log/xx/) + 1
 
         str_append_s(&logpath, folder);
 
         str_append_p(&logpath, 4, "log/");
 
         str_append_p(&logpath, strlen(gamecfg->name), gamecfg->name);
+        
+        str_append_p(&logpath, 1, "/");
 
         tmpp = str_raw_p(&logpath);
 
