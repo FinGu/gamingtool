@@ -10,10 +10,10 @@
 #include "utils.h"
 #include "filesys.h"
 
-/* __split_out split(char delim, string args){ //ghetto
-    int i, n, s; 
+__split_out split(char delim, string args){ //ghetto, must be a \0 ended string
+    int i, n, s, len = str_len(&args); 
 
-    char *cpargs = strdup(args.ptr), **out;
+    char *cpargs = strdup(str_raw_p(&args)), **out;
 
     for(i = n = 0; i < args.len; ++i){
         if(cpargs[i] == delim){
@@ -28,7 +28,7 @@
 
     out[0] = cpargs;
 
-    for(i = n = 0; i < args.len; ++i){
+    for(i = n = 0; i < len-1; ++i){
         if(cpargs[i] == '\0'){
             out[(n++)+1] = &cpargs[i+1]; //trick to avoid allocating for each splitted string
         }
@@ -37,26 +37,27 @@
     return (__split_out){s, out};
 }
 
-void freesplit(__split_out in){
+void free_split(__split_out in){
     char **ptr = in.ptr;
 
     free(ptr[0]);
 
     free(ptr);
-} */
+}
 
 string get_file_from_path(string in){
-    size_t i;
+    size_t i, len = str_len(&in);
     char *ptr = NULL;
     string out = str_alloc(0);
+    char *tmpp = str_raw_p(&in);
 
-    for(i = 0; i < in.len; i++){
+    for(i = 0; i < len; i++){
         if(in.ptr[i] == '/'){
-            ptr = &in.ptr[i+1]; //fine because in.len doesnt include the term
+            ptr = &tmpp[i+1]; //fine because in.len doesnt include the term
         }
     }
-    
-    out = (string){.len = strlen(ptr), .ptr = ptr}; //string here is used as a holder for a ptr and len, other uses like this can be found on main, parse and run
+
+    out = str_view(strlen(ptr), ptr); //string here is used as a container for a ptr and len, other uses like this can be found on main, parse and run
 
     return out;
 } 
@@ -142,4 +143,4 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
     free(inargs);
 
     return err;
-} 
+}

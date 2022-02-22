@@ -17,6 +17,8 @@ gt_error get_config(config *in, string folder){
     string location = str_alloc(folder.len + 6), //6 for config
            cfg = str_alloc(0); 
 
+    char *tmpp = NULL; 
+
     str_append_s(&location, folder);
 
     str_append_p(&location, 6, "config");
@@ -33,7 +35,9 @@ gt_error get_config(config *in, string folder){
             goto out;
         } 
 
-        if(write(fd, cfg.ptr, cfg.len) == -1){
+        tmpp = str_raw_p(&cfg);
+
+        if(write(fd, tmpp, str_len(&cfg)) == -1){
             err = failed_to_write;
             goto out;
         }
@@ -41,7 +45,7 @@ gt_error get_config(config *in, string folder){
         buf[BUFSIZE-1] = '\0';
     }
 
-    err = parse_config(in, ((cfg.ptr) ? cfg.ptr : buf));
+    err = parse_config(in, ((tmpp) ? tmpp : buf));
     
     out:
     str_free(&location);
@@ -68,13 +72,13 @@ gt_error get_game_config(game_config* in, string* game_folder, string folder, st
         goto out;
     }
 
-    in->name = strdup(game.ptr);
+    in->name = strdup(str_raw_p(&game));
 
     *game_folder = __game_folder;
     
     out:
     if(err){
-        free(__game_folder.ptr);
+        str_free(&__game_folder);
     }
 
     return err;

@@ -2,14 +2,14 @@
 
 #define BUFSIZE 1024 
 
-/* typedef struct {
+typedef struct {
     size_t size;
     char **ptr;
 } __split_out;
 
 __split_out split(char, string);
 
-void freesplit(__split_out); */
+void free_split(__split_out);
 
 string get_file_from_path(string); 
 

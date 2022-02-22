@@ -4,6 +4,10 @@
 #include <string.h>
 #include <stdio.h>
 
+string str_view(size_t len, char *ptr){ //really abused function
+    return (string){.len = len, .ptr = ptr};
+}
+
 string str_alloc(size_t size){
     if(size == 0){
         return (string){0, 0, 0, NULL};
@@ -18,10 +22,10 @@ string str_alloc(size_t size){
     return (string){0, sz, 0, ptr};
 }
 
-void str_realloc(string *in, size_t nsize){
+void __str_realloc(string *in, size_t nsize){
     int ns = nsize + __TERM;
 
-    char *reptr = realloc(in->ptr, sizeof(char) * ns);
+    char *reptr = realloc(str_raw_p(in), sizeof(char) * ns);
     
     OUTMEM(reptr); //free(in->ptr);
 
@@ -36,15 +40,15 @@ void str_append_s(string *in, string to_append){
 
     if(chk <= appendlen_asint){
         if(in->flag){ // one use only flag
-            str_realloc(in, insize_noterm + appendlen_asint);
+            __str_realloc(in, insize_noterm + appendlen_asint);
         } else {
-            str_realloc(in, ((chk < 0) ? -chk : chk) + insize_noterm);
+            __str_realloc(in, ((chk < 0) ? -chk : chk) + insize_noterm);
 
             in->flag = 1;
         }
     }
 
-    memcpy(in->ptr + in->len, to_append.ptr, to_append.len + __TERM);
+    memcpy(str_raw_p(in) + in->len, str_raw_p(&to_append), to_append.len + __TERM);
     
     in->len += to_append.len;
 }
@@ -72,7 +76,7 @@ char *str_raw_p(string *in){
 }
 
 void str_free(string *in){
-    free(in->ptr);
+    free(str_raw_p(in));
 
     *in = str_alloc(0);
 }

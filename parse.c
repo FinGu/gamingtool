@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "parse.h"
+#include "utils.h"
 
 //to be used somewhere else later
 gt_error create_parser(cJSON **out, char *data){
@@ -44,7 +45,78 @@ gt_error create_config(string* data){
         goto out;
     }
 
-    outbuf = (string){.len = strlen(buf), .ptr = buf};
+    outbuf = str_view(strlen(buf), buf);
+
+    *data = outbuf; 
+
+    out:
+    cJSON_Delete(config);
+
+    return err;
+}
+
+gt_error create_game_config(string* data, game_config in){
+    char *buf;
+    size_t i;
+    string outbuf = str_alloc(0);
+    cJSON *config = cJSON_CreateObject(), *obj, *inel;
+    gt_error err = ok;
+
+    if(!config){
+        err = cjson_failure;
+        goto out;
+    }
+
+    //name isn't part of the cfg
+
+    if(in.path){
+        obj = cJSON_CreateString(in.path);
+
+        cJSON_AddItemToObject(config, "path", obj);
+    }
+
+    if(in.arguments.size){
+        obj = cJSON_CreateArray();
+
+        for(i = 0; i < in.arguments.size; ++i){
+            inel = cJSON_CreateString(in.arguments.ptr[i]);
+
+            cJSON_AddItemToArray(obj, inel) ;
+        }
+
+        cJSON_AddItemToObject(config, "arguments", obj);
+    }
+
+    if(in.wine.version){
+        obj = cJSON_CreateObject();
+
+        inel = cJSON_CreateString(in.wine.version);
+
+        cJSON_AddItemToObject(obj, "version", inel);
+        
+        cJSON_AddItemToObject(config, "wine", obj);
+    }
+
+    obj = cJSON_CreateObject();
+
+    inel = cJSON_CreateBool(in.scripts.prelaunch);
+
+    cJSON_AddItemToObject(obj, "prelaunch", inel);
+
+    inel = cJSON_CreateBool(in.scripts.postlaunch);
+
+    cJSON_AddItemToObject(obj, "postlaunch", inel);
+
+    cJSON_AddItemToObject(config, "scripts", obj);
+
+    buf = cJSON_Print(config);
+
+    if(!buf){
+        err = cjson_failure;
+        goto out;
+    }
+
+    outbuf = str_view(strlen(buf), buf);
 
     *data = outbuf;
 
@@ -130,7 +202,7 @@ gt_error parse_game_config(game_config *out, char *data){
     }
 
     if(sz){
-        out->arguments = (struct __args){sz, calloc(sz, sizeof(char*))};
+        out->arguments = (struct __args){0, sz, calloc(sz, sizeof(char*))};
                 
         cJSON_ArrayForEach(in, handle)
         {
@@ -168,11 +240,14 @@ void free_game_config(game_config *to_free){
     free(to_free->name);
     free(to_free->path);
 
-    for(; i < to_free->arguments.size; ++i){
-        free(to_free->arguments.ptr[i]);
+    if(to_free->arguments.split){
+        free_split((__split_out){.size = to_free->arguments.size, .ptr = to_free->arguments.ptr});
+    } else {
+        for(; i < to_free->arguments.size; ++i){
+            free(to_free->arguments.ptr[i]);
+        }
+        free(to_free->arguments.ptr);
     }
-
-    free(to_free->arguments.ptr);
 
     free(to_free->wine.version);
 }

@@ -10,7 +10,7 @@ gt_error list(string folder, char *arg){
     string folderbuf;
     gt_error err = ok;
         
-    fblen = folder.len + 4; //for game or wine
+    fblen = str_len(&folder) + 4; //for game or wine
 
     folderbuf = str_alloc(fblen);
 
@@ -18,12 +18,12 @@ gt_error list(string folder, char *arg){
 
     str_append_p(&folderbuf, strlen(arg), arg);
 
-    printf(PREFIX);
+    fputs(PREFIX, stdout);
 
     err = print_files_in_folder(str_raw_p(&folderbuf));
 
     str_free(&folderbuf);
 
-    return err;
+    return err; 
 }
 

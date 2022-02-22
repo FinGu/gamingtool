@@ -12,19 +12,21 @@ typedef struct {
     char *ptr;
 } string;
 
-string str_alloc(size_t);
+string str_view(size_t, char*); //char* as a string view (immutable)
 
-void str_realloc(string*, size_t);
+string str_alloc(size_t); // allocate str
 
-void str_append_p(string*, size_t, char *);
+void __str_realloc(string*, size_t); //internal realloc
 
-void str_append_s(string*, string);
+void str_append_p(string*, size_t, char *); //append char* to a string
 
-void str_clear(string*, size_t);
+void str_append_s(string*, string); //append string to string
 
-size_t str_len(string*);
+void str_clear(string*, size_t); //clear a number of chars
 
-char *str_raw_p(string*);
+size_t str_len(string*); //gets len of str
 
-void str_free(string*);
+char *str_raw_p(string*); //char* from str
+
+void str_free(string*); //frees string
 

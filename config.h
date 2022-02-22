@@ -19,7 +19,8 @@ typedef struct {
 } config;
 
 struct __args {
-    int size;
+    int split; //has a splitted string been passed
+    size_t size;
     char **ptr;
 };
 

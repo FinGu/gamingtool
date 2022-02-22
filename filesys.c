@@ -53,7 +53,7 @@ gt_error print_files_in_folder(char *folder){
 gt_error read_config(size_t bufsize, char *buf, string folder){ 
     int fd;
     gt_error err = ok;
-    size_t nlen = folder.len + 6; //6 for config
+    size_t nlen = str_len(&folder) + 6; //6 for config
 
     string location = str_alloc(nlen);
 
@@ -85,7 +85,7 @@ gt_error read_config(size_t bufsize, char *buf, string folder){
 gt_error get_game_folder(string *out, string folder, string game){
     gt_error err = ok;
     string cout;
-    size_t nlen = folder.len + 6 + game.len; // 6 for game//
+    size_t nlen = str_len(&folder) + 6 + str_len(&game); // 6 for game//
     
     cout = str_alloc(nlen);
 
@@ -97,7 +97,7 @@ gt_error get_game_folder(string *out, string folder, string game){
 
     str_append_p(&cout, 1, "/");
 
-    if(!can_access(cout.ptr, S_IFDIR)){ 
+    if(!can_access(str_raw_p(&cout), S_IFDIR)){ 
         err = failed_to_open;
         goto out;
     }
@@ -137,8 +137,10 @@ gt_error get_create_folder(string *out){
 
     str_append_p(&folder, 1, "/");
 
-    if(!can_access(folder.ptr, S_IFDIR)){
-        if(!__mkdir(folder.ptr)){
+    tmpp = str_raw_p(&folder);
+
+    if(!can_access(tmpp, S_IFDIR)){
+        if(!__mkdir(tmpp)){
             err = failed_to_create_dir;
             goto out;
         }

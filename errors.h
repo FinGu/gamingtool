@@ -20,8 +20,10 @@ typedef enum {
     //run stats
     game_not_found,
     couldnt_find_wine,
-    failed_to_start
+    failed_to_start,
     //run ends
+    //create starts
+    game_already_exists 
 
 } gt_error;
 
