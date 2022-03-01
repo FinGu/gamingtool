@@ -8,6 +8,7 @@
 
 #include "run.h"
 #include "create.h"
+#include "delete.h"
 #include "list.h"
 #include "info.h"
 #include "utils.h"
@@ -58,6 +59,9 @@ int main(int argc, char **argv){
     else if(strcmp(argp, "create") == 0){
         err = create(&cfg, folder, argh);
     }
+    else if(strcmp(argp, "delete") == 0){
+        err = delete(&cfg, folder, argh);
+    }
     else{
         usage();
     }
@@ -78,6 +82,7 @@ void usage(){
         "run <game> ( Runs a game )\n" \
         "info <game> ( Shows a config's structure )\n" \
         "list <wine or game> ( Displays all the names of the games/wines )\n" \
-        "create <game name> ( Prompts a cli tool to create a game config )"
+        "create <game name> ( Prompts a cli tool to create a game config )\n" \
+        "delete <game> ( Removes a game )"
     );
 }

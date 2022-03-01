@@ -9,6 +9,7 @@ typedef enum {
     failed_to_open,
     failed_to_read,
     failed_to_write,
+    failed_to_delete,
     failed_to_create_dir,
     failed_to_execute,
     home_not_found,
@@ -24,6 +25,7 @@ typedef enum {
     //run ends
     //create starts
     game_already_exists 
+    //create ends
 
 } gt_error;
 

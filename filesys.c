@@ -38,9 +38,9 @@ gt_error print_files_in_folder(char *folder){
         //we want to see hidden files too
         if(strcmp(dd->d_name, ".") == 0 || strcmp(dd->d_name, "..") == 0){ 
             continue; 
-        }
+        } 
 
-         printf("%s,", dd->d_name);
+        printf("%s,", dd->d_name);
     }
 
     putchar('\n');
@@ -48,6 +48,66 @@ gt_error print_files_in_folder(char *folder){
     closedir(d);
 
     return ok;
+}
+
+gt_error delete_files_in_folder(char *folder){
+    int st;
+    gt_error err = ok;
+    DIR *d = opendir(folder);
+    struct dirent *dd;
+    size_t tmplen = strlen(folder);
+    char *tmpp = NULL;
+
+    if(!d){
+        err = failed_to_open;
+        goto out;
+    }
+    
+    while((dd = readdir(d))){
+        if(strcmp(dd->d_name, ".") == 0 || strcmp(dd->d_name, "..") == 0){ 
+            continue; 
+        }
+
+        tmplen += strlen(dd->d_name) + (dd->d_type == DT_DIR) + 2; //1 for /, 1 for term
+
+        tmpp = calloc(tmplen, sizeof(char));
+
+        OUTMEM(tmpp);
+
+        strcpy(tmpp, folder);
+
+        strcat(tmpp, "/");
+
+        strcat(tmpp, dd->d_name);
+
+        if(dd->d_type == DT_DIR){
+            if((err = delete_files_in_folder(tmpp))){
+                goto out;
+            }
+
+            if((st = rmdir(tmpp)) == -1){
+                err = failed_to_delete;
+                goto out;
+            }
+        } else {
+            if((st = remove(tmpp)) == -1){
+                err = failed_to_delete;
+                goto out;
+            }
+        }
+
+        free(tmpp);
+    }
+
+out:
+    if(tmpp){
+        free(tmpp);
+    }
+
+    closedir(d);
+
+
+    return err;
 }
 
 gt_error read_config(size_t bufsize, char *buf, string folder){ 

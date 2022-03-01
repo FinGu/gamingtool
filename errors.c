@@ -13,6 +13,7 @@ void print_error(gt_error error){
         {failed_to_open, "Failed to open the file/dir"},
         {failed_to_read, "Failed to read the file"},
         {failed_to_write, "Failed to write to the file"},
+        {failed_to_delete, "Failed to delete a/the file"},
         {failed_to_create_dir, "Failed to create directories"},
         {failed_to_execute, "Failed to execute ( no execute permissions )"},
         {home_not_found, "The environment variable HOME wasn't found, please create it before proceeding"},

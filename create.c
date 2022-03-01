@@ -11,20 +11,7 @@
 #include "parse.h"
 #include "utils.h"
 
-char *__strdup(size_t *ln, char *in){
-    size_t len = strlen(in);
-    char* ptr = malloc(len+1);
-
-    if(!ptr) {
-        return NULL;
-    }
-
-    strcpy(ptr, in);
-
-    *ln = len; 
-
-    return ptr;
-}
+char *__strdup(size_t*, char*);
 
 gt_error create(config *cfg, string folder, string game){
     int fd = -1;
@@ -36,7 +23,7 @@ gt_error create(config *cfg, string folder, string game){
     game_config gamecfg = {0};
     __split_out spl = {0};
     
-    fpsz = str_len(&folder)+ str_len(&game)+ 12; //5 for game/, 7 for /config
+    fpsz = str_len(&folder) + str_len(&game)+ 12; //5 for game/, 7 for /config
 
     filepath = str_alloc(fpsz);
 
@@ -44,11 +31,11 @@ gt_error create(config *cfg, string folder, string game){
 
     str_append_p(&filepath, 5, "game/");
 
-    str_append_s(&filepath, game);
+    str_append_s(&filepath, game); 
 
     //assert(game[game.len-1] != '/');
 
-    tmpp = str_raw_p(&filepath);
+    tmpp = str_raw_p(&filepath); 
 
     if(can_access(tmpp, S_IFDIR)){
         err = game_already_exists;
@@ -123,7 +110,6 @@ gt_error create(config *cfg, string folder, string game){
         err = failed_to_write;
         goto out2;
     }
-    
 
     out2:
     str_free(&pgamecfg);
@@ -134,4 +120,19 @@ gt_error create(config *cfg, string folder, string game){
     str_free(&filepath);
 
     return err;
+}
+
+char *__strdup(size_t *ln, char *in){
+    size_t len = strlen(in);
+    char* ptr = malloc(len+1);
+
+    if(!ptr) {
+        return NULL;
+    }
+
+    strcpy(ptr, in);
+
+    *ln = len; 
+
+    return ptr;
 }
