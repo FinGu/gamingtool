@@ -5,10 +5,6 @@ Building:
 1. meson build
 2. ninja -C build
 
-Usage:
-- run game
-- list (wine or game)
-
 With the first usage of the program a folder named .gamingtool is created in $HOME
   
 Folder structure of .gamingtool:
