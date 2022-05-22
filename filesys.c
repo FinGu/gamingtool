@@ -97,6 +97,8 @@ gt_error delete_files_in_folder(char *folder){
         }
 
         free(tmpp);
+        
+        tmpp = NULL;
     }
 
 out:
