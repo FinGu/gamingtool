@@ -8,7 +8,6 @@
 typedef struct {
     size_t len;
     size_t size;
-    bool flag;
     char *ptr;
 } string;
 
