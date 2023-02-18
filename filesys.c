@@ -33,21 +33,29 @@ gt_error print_files_in_folder(char *folder){
     if(!d){
         return failed_to_open;
     }
-     
+
+    bool first_entry = true;
+    
     while((dd = readdir(d))){
         //we want to see hidden files too
         if(strcmp(dd->d_name, ".") == 0 || strcmp(dd->d_name, "..") == 0){ 
             continue; 
         } 
 
-        printf("%s,", dd->d_name);
+        if(!first_entry){
+            printf(",");
+        }
+
+        printf("%s", dd->d_name);
+
+        first_entry = false;
     }
 
     putchar('\n');
 
     closedir(d);
 
-    return ok;
+    return ok; 
 }
 
 gt_error delete_files_in_folder(char *folder){
