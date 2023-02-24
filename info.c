@@ -7,8 +7,20 @@
 #define AS_BOOL(x) ((x) ? "true" : "false")
 #define OR_NULL(x) ((x) ? x : "(null)")
 
+void print_args(struct __args* args, bool skip){
+    int sz = args->size;
+    int i = skip;
+
+    if(sz && !(sz == 1 && i)){
+        for(; i < sz; ++i){
+            printf( ((i == sz-1) ? "%s\n" : "%s, "), OR_NULL(args->ptr[i]));
+        }
+    } else {
+        puts(OR_NULL(NULL));
+    }
+}
+
 gt_error info(config *cfg, string folder, string game){
-    int i, sz;
     gt_error err = ok;
     game_config gamecfg = {0};
     string game_folder = str_alloc(0);
@@ -21,19 +33,15 @@ gt_error info(config *cfg, string folder, string game){
         "%s:\n"\
         "    path: %s\n"\
         "    arguments: ", gamecfg.name, gamecfg.path
+    ); 
+
+    print_args(&gamecfg.arguments, gamecfg.wine.version != NULL);
+
+    printf(
+        "    environment: " 
     );
-
-    i = gamecfg.wine.version != NULL;
-
-    sz = gamecfg.arguments.size;
-
-    if(sz && !(sz == 1 && i)){
-        for(; i < sz; ++i){
-            printf( ((i == sz-1) ? "%s\n" : "%s, "), OR_NULL(gamecfg.arguments.ptr[i]));
-        }
-    } else {
-        puts(OR_NULL(NULL));
-    }
+    
+    print_args(&gamecfg.environment, 0);
 
     printf(
         "    wine:\n" \

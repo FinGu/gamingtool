@@ -13,4 +13,4 @@ void free_split(__split_out);
 
 string get_file_from_path(string); 
 
-gt_error prun(char*, struct __args*, char*, bool); 
+gt_error prun(char*, struct __args*, struct __args*, char*, bool); 

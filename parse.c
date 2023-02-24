@@ -87,6 +87,18 @@ gt_error create_game_config(string* data, game_config in){
         cJSON_AddItemToObject(config, "arguments", obj);
     }
 
+    if(in.environment.size){
+        obj = cJSON_CreateArray();
+
+        for(i = 0; i < in.environment.size; ++i){
+            inel = cJSON_CreateString(in.environment.ptr[i]);
+
+            cJSON_AddItemToArray(obj, inel) ;
+        }
+
+        cJSON_AddItemToObject(config, "environment", obj);
+    }
+
     if(in.wine.version){
         obj = cJSON_CreateObject();
 
@@ -194,7 +206,7 @@ gt_error parse_game_config(game_config *out, char *data){
 
     handle = cJSON_GetObjectItem(config, "arguments");
 
-    sz = cJSON_GetArraySize(handle);
+    sz = cJSON_GetArraySize(handle); 
 
     if(out->wine.version){
         ++sz;
@@ -211,6 +223,25 @@ gt_error parse_game_config(game_config *out, char *data){
             }
 
             out->arguments.ptr[i++] = strdup(in->valuestring);
+        } 
+    }
+
+    handle = cJSON_GetObjectItem(config, "environment");
+
+    sz = cJSON_GetArraySize(handle);
+
+    if(sz){
+        i = 0;
+
+        out->environment = (struct __args){0, sz, calloc(sz, sizeof(char*))};
+
+        cJSON_ArrayForEach(in, handle)
+        {
+            if(!cJSON_IsString(in)){
+                continue;
+            }
+
+            out->environment.ptr[i++] = strdup(in->valuestring);
         }
     }
 
@@ -240,14 +271,21 @@ void free_game_config(game_config *to_free){
     free(to_free->name);
     free(to_free->path);
 
+    free(to_free->wine.version);
+
     if(to_free->arguments.split){
         free_split((__split_out){.size = to_free->arguments.size, .ptr = to_free->arguments.ptr});
     } else {
         for(; i < to_free->arguments.size; ++i){
             free(to_free->arguments.ptr[i]);
         }
-        free(to_free->arguments.ptr);
+        free(to_free->arguments.ptr); 
     }
 
-    free(to_free->wine.version);
+    if(to_free->environment.size){
+        for(; i < to_free->environment.size; ++i){
+            free(to_free->environment.ptr[i]);
+        }
+        free(to_free->environment.ptr);
+    }
 }

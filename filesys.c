@@ -55,7 +55,7 @@ gt_error print_files_in_folder(char *folder){
 
     closedir(d);
 
-    return ok; 
+    return ok;  
 }
 
 gt_error delete_files_in_folder(char *folder){

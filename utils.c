@@ -62,31 +62,43 @@ string get_file_from_path(string in){
     return out;
 } 
 
-gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_stdout) {
-    int i, sz = 2, last = 0;
+char **args_as_argv(struct __args *args, char* process){
+    int i, j;
+
+    i = j = 0;
+
+    int sz = 2 + (args ? args->size : 0);
+
+    char **out = calloc(sz, sizeof(char*));
+
+    if(!out){
+        exit(0);
+    }
+
+    if(process){
+        out[0] = process;
+        i = 1;
+    }
+
+    for(; j < sz-2; ++j){
+        out[i++] = args->ptr[j];
+    }
+
+    out[sz-1] = NULL;
+
+    return out;
+}
+
+gt_error prun(char *process, struct __args *args, struct __args *env, char *log_file, bool log_to_stdout) {
+    int sz, last;
     char **inargs, buf[BUFSIZE] = {0};
     gt_error err = ok;
 
     int fd = 0, spipe[2];
     pid_t pid;
 
-    if(args){
-        sz += args->size;
-    }
-
-    inargs = calloc(sz, sizeof(char*)); //can be avoided if args == NULL
-
-    if(!inargs){
-        exit(0);
-    }
-
-    inargs[0] = process;
-
-    for(i = 0; i < sz-2; ++i){
-        inargs[i+1] = args->ptr[i];
-    }
-
-    inargs[sz-1] = NULL;
+    inargs = args_as_argv(args, process);
+    //inenv = args_as_argv(env, NULL);
 
     //{"echo", "hello", ..., NULL}
 
@@ -100,7 +112,11 @@ gt_error prun(char *process, struct __args *args, char *log_file, bool log_to_st
 
         dup2(spipe[1], STDOUT_FILENO);
 
-        execv(inargs[0], inargs);
+        for(sz = 0; sz < env->size; ++sz){
+            putenv(env->ptr[sz]);
+        }
+
+        execvp(inargs[0], inargs);
 
         _exit(0);
     } else{

@@ -75,6 +75,20 @@ gt_error create(config *cfg, string folder, string game){
         spl = split(',', str_view(len, buf));
 
         gamecfg.arguments = (struct __args){.split = 1, .size = spl.size, .ptr = spl.ptr};
+    } 
+
+    fputs("Environment variables ( A=b, ...) ( leave empty for none ): ", stdout);
+    
+    fgets(buf, BUFSIZE, stdin);
+
+    if(*buf != '\n'){
+        len = strlen(buf);
+
+        buf[len-1] = '\0';
+
+        spl = split(',', str_view(len, buf));
+
+        gamecfg.environment = (struct __args){.split = 1, .size = spl.size, .ptr = spl.ptr};
     }
 
     fputs("Wine version ( leave empty to not use wine ): ", stdout);

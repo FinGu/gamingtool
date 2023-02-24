@@ -113,7 +113,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     }
 
     if(gamecfg->scripts.prelaunch || gamecfg->scripts.postlaunch){
-        scpath = str_alloc(str_len(&game_folder) + 10); //10 for the script name
+        scpath = str_alloc(str_len(&game_folder) + 10); //10 for the script name 
 
         str_append_s(&scpath, game_folder);
     }
@@ -127,7 +127,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         
         tmpp = str_raw_p(&scpath);
 
-        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, NULL, cfg->debug) : failed_to_execute); 
+        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, NULL, NULL, cfg->debug) : failed_to_execute); 
 
         str_clear(&scpath, 9); //clears prelaunch
 
@@ -200,7 +200,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         
         tmpp = str_raw_p(&scpath);
 
-        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, NULL, cfg->debug) : failed_to_execute);
+        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, NULL, NULL, cfg->debug) : failed_to_execute);
 
         //no need to clear postlaunch
 
@@ -225,11 +225,9 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
     char *tmpp;
     string program, executable, winepath = str_alloc(0);
 
-    struct __args *arguments = &gamecfg->arguments;
+    struct __args *arguments = &gamecfg->arguments, *environment = &gamecfg->environment;
 
     executable = get_file_from_path(str_view(pathlen, gamecfg->path));
-
-    arguments = &gamecfg->arguments; 
 
     if(gamecfg->wine.version && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
         goto out;
@@ -256,9 +254,9 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
     if(gamecfg->wine.version){
         arguments->ptr[0] = tmpp; // pass program as an arg to wine
 
-        err = prun(str_raw_p(&winepath), arguments, log_path, log_to_stdout); // run wine
+        err = prun(str_raw_p(&winepath), arguments, environment, log_path, log_to_stdout); // run wine
     } else {
-        err = prun(tmpp, arguments, log_path, log_to_stdout);
+        err = prun(tmpp, arguments, environment, log_path, log_to_stdout);
     }
 
     str_free(&winepath);
