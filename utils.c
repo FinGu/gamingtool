@@ -112,8 +112,10 @@ gt_error prun(char *process, struct __args *args, struct __args *env, char *log_
 
         dup2(spipe[1], STDOUT_FILENO);
 
-        for(sz = 0; sz < env->size; ++sz){
-            putenv(env->ptr[sz]);
+        if(env){
+            for(sz = 0; sz < env->size; ++sz){
+                putenv(env->ptr[sz]);
+            }
         }
 
         execvp(inargs[0], inargs);
