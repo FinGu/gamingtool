@@ -127,7 +127,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         
         tmpp = str_raw_p(&scpath);
 
-        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, NULL, NULL, cfg->debug) : failed_to_execute); 
+        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, &gamecfg->environment, NULL, cfg->debug) : failed_to_execute); 
 
         str_clear(&scpath, 9); //clears prelaunch
 
@@ -200,7 +200,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         
         tmpp = str_raw_p(&scpath);
 
-        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, NULL, NULL, cfg->debug) : failed_to_execute);
+        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, &gamecfg->environment, NULL, cfg->debug) : failed_to_execute);
 
         //no need to clear postlaunch
 
