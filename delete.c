@@ -14,11 +14,7 @@ gt_error delete(config *cfg, string folder, string game){
 
     rem = str_alloc(rsz);
 
-    str_append_s(&rem, folder);
-
-    str_append_p(&rem, 5, "game/");
-
-    str_append_s(&rem, game);
+    str_append_multiple(&rem, 3, folder, str_view(5, "game/"), game);
 
     tmpp = str_raw_p(&rem);
 

@@ -17,9 +17,11 @@ string str_alloc(size_t); // allocate str
 
 void __str_realloc(string*, size_t); //internal realloc
 
-void str_append_p(string*, size_t, char *); //append char* to a string
+void str_append(string*, string); //append string to string
 
-void str_append_s(string*, string); //append string to string
+void str_append_multiple(string*, size_t, ...); //append multiple strings
+
+string str_sub(string*, int, int); //substr
 
 void str_clear(string*, size_t); //clear a number of chars
 

@@ -14,9 +14,7 @@ gt_error list(string folder, char *arg){
 
     folderbuf = str_alloc(fblen);
 
-    str_append_s(&folderbuf, folder);
-
-    str_append_p(&folderbuf, strlen(arg), arg);
+    str_append_multiple(&folderbuf, 2, folder, str_view(strlen(arg), arg));
 
     fputs(PREFIX, stdout);
 

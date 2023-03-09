@@ -51,34 +51,27 @@ gt_error find_wine(string *out, string folder, char *wine){ //we don't have the 
 
     cout = str_alloc(len);
 
-    str_append_s(&cout, folder);
-
-    str_append_p(&cout, 5, "wine/");
-
-    str_append_p(&cout, wlen, wine);
-
-    str_append_p(&cout, 1, "/");
+    // "%swine/%s/"
+    str_append_multiple(&cout, 4, folder, str_view(5, "wine/"), str_view(wlen, wine), str_view(1, "/"));
 
     tmpp = str_raw_p(&cout);
-
-    // "%swine/%s/"
 
     if(!can_access(tmpp, S_IFDIR)){
         err = couldnt_find_wine;
         goto out;
     }
 
-    str_append_p(&cout, 4, "wine");
+    str_append(&cout, str_view(4, "wine"));
 
     if(can_access(tmpp, S_IXUSR)){
         goto out;
     } 
 
     str_clear(&cout, 4);
-    
+
     //memset(&cout.ptr[len-8], 0, 4); //clears only wine
 
-    str_append_p(&cout, 8, "bin/wine");
+    str_append(&cout, str_view(8, "bin/wine"));
 
     if (can_access(tmpp, S_IXUSR)){
         goto out;
@@ -115,7 +108,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     if(gamecfg->scripts.prelaunch || gamecfg->scripts.postlaunch){
         scpath = str_alloc(str_len(&game_folder) + 10); //10 for the script name 
 
-        str_append_s(&scpath, game_folder);
+        str_append(&scpath, game_folder);
     }
     
     if(gamecfg->scripts.prelaunch){
@@ -123,7 +116,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Running the prelaunch script");
         }
 
-        str_append_p(&scpath, 9, "prelaunch");
+        str_append(&scpath, str_view(9, "prelaunch"));
         
         tmpp = str_raw_p(&scpath);
 
@@ -145,13 +138,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         logpath = str_alloc(str_len(&game_folder)-1 + 30); //30 for the name of the file
         // len(game/xx/) == len(log/xx/) + 1
 
-        str_append_s(&logpath, folder);
-
-        str_append_p(&logpath, 4, "log/");
-
-        str_append_p(&logpath, strlen(gamecfg->name), gamecfg->name);
-        
-        str_append_p(&logpath, 1, "/");
+        str_append_multiple(&logpath, 4, folder, str_view(4, "log/"), str_view(strlen(gamecfg->name), gamecfg->name), str_view(1, "/"));
 
         tmpp = str_raw_p(&logpath);
 
@@ -175,7 +162,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
             strftime(namebuf, 30, "%Y-%m-%d %H:%M:%S.txt", timeinfo);
 
-            str_append_p(&logpath, 30, namebuf);
+            str_append(&logpath, str_view(30, namebuf));
         }
     }
 
@@ -196,7 +183,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
             puts(PREFIX"Running the postlaunch script");
         }
 
-        str_append_p(&scpath, 10, "postlaunch");
+        str_append(&scpath, str_view(10, "postlaunch"));
         
         tmpp = str_raw_p(&scpath);
 
@@ -245,9 +232,7 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
 
     program = str_alloc(proglen);
     
-    str_append_p(&program, 2, "./");
-
-    str_append_s(&program, executable);
+    str_append_multiple(&program, 2, str_view(2, "./"), executable);
     
     tmpp = str_raw_p(&program);
 

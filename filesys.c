@@ -127,9 +127,7 @@ gt_error read_config(size_t bufsize, char *buf, string folder){
 
     string location = str_alloc(nlen);
 
-    str_append_s(&location, folder);
-
-    str_append_p(&location, 6, "config");
+    str_append_multiple(&location, 2, folder, str_view(6, "config"));
 
     fd = open(str_raw_p(&location), O_RDONLY, FILE_PERM);
     
@@ -159,13 +157,7 @@ gt_error get_game_folder(string *out, string folder, string game){
     
     cout = str_alloc(nlen);
 
-    str_append_s(&cout, folder);
-
-    str_append_p(&cout, 5, "game/");
-
-    str_append_s(&cout, game);
-
-    str_append_p(&cout, 1, "/");
+    str_append_multiple(&cout, 4, folder, str_view(5, "game/"), game, str_view(1, "/"));
 
     if(!can_access(str_raw_p(&cout), S_IFDIR)){ 
         err = failed_to_open;
@@ -197,15 +189,11 @@ gt_error get_create_folder(string *out){
 
     dlen = NSIZE + 2; //+1 for / and +1 for .
 
-    slen = hlen + dlen; 
+    slen = hlen + dlen + 1;  // for /
 
     folder = str_alloc(slen);
 
-    str_append_p(&folder, hlen, home);
-
-    str_append_p(&folder, dlen, DIRNAME);
-
-    str_append_p(&folder, 1, "/");
+    str_append_multiple(&folder, 3, str_view(hlen, home), str_view(dlen, DIRNAME), str_view(1, "/"));
 
     tmpp = str_raw_p(&folder);
 
@@ -216,10 +204,8 @@ gt_error get_create_folder(string *out){
         }
 
         nfolder = str_alloc(slen + 4); //+4 for the subfolder name
-
-        str_append_s(&nfolder, folder);
-
-        str_append_p(&nfolder, 4, "game"); 
+                                    
+        str_append_multiple(&nfolder, 2, folder, str_view(4, "game"));
 
         tmpp = str_raw_p(&nfolder); //this pointer shouldnt change as in this context realloc isnt called
 
@@ -227,13 +213,13 @@ gt_error get_create_folder(string *out){
 
         str_clear(&nfolder, 4); //clears game
 
-        str_append_p(&nfolder, 4, "wine");
+        str_append(&nfolder, str_view(4, "wine"));
 
         __mkdir(tmpp);
         
         str_clear(&nfolder, 4); //clears wine
-
-        str_append_p(&nfolder, 3, "log");
+        
+        str_append(&nfolder, str_view(3, "log"));
 
         __mkdir(tmpp);
 

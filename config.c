@@ -19,9 +19,7 @@ gt_error get_config(config *in, string folder){
 
     char *tmpp = NULL; 
 
-    str_append_s(&location, folder);
-
-    str_append_p(&location, 6, "config");
+    str_append_multiple(&location, 2, folder, str_view(6, "config"));
 
     fd = open(str_raw_p(&location), O_CREAT | O_RDWR, FILE_PERM);
 

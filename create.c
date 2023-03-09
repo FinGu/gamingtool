@@ -27,11 +27,7 @@ gt_error create(config *cfg, string folder, string game){
 
     filepath = str_alloc(fpsz);
 
-    str_append_s(&filepath, folder);
-
-    str_append_p(&filepath, 5, "game/");
-
-    str_append_s(&filepath, game); 
+    str_append_multiple(&filepath, 3, folder, str_view(5, "game/"), game);
 
     //assert(game[game.len-1] != '/');
 
@@ -47,7 +43,7 @@ gt_error create(config *cfg, string folder, string game){
         goto out;
     }
 
-    str_append_p(&filepath, 7, "/config");
+    str_append(&filepath, str_view(7, "/config"));
 
     fputs(PREFIX"Game's path: ", stdout);
 
