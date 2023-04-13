@@ -18,33 +18,11 @@ gt_error create(config *cfg, string folder, string game){
     size_t fpsz, len = 0;
     string filepath;
     gt_error err = ok;
-    char c, *tmpp, buf[BUFSIZE] = {0};
+    char *tmpp, buf[BUFSIZE] = {0};
     string pgamecfg;
-    game_config gamecfg = {0};
+    game_config gamecfg = {0}; 
     __split_out spl = {0};
     
-    fpsz = str_len(&folder) + str_len(&game)+ 12; //5 for game/, 7 for /config
-
-    filepath = str_alloc(fpsz);
-
-    str_append_multiple(&filepath, 3, folder, str_view(5, "game/"), game);
-
-    //assert(game[game.len-1] != '/');
-
-    tmpp = str_raw_p(&filepath); 
-
-    if(can_access(tmpp, S_IFDIR)){
-        err = game_already_exists;
-        goto out;
-    }
-
-    if(!__mkdir(tmpp)){
-        err = failed_to_create_dir;
-        goto out;
-    }
-
-    str_append(&filepath, str_view(7, "/config"));
-
     fputs(PREFIX"Game's path: ", stdout);
 
     fgets(buf, BUFSIZE, stdin);
@@ -53,12 +31,6 @@ gt_error create(config *cfg, string folder, string game){
 
     gamecfg.path[len-1] = '\0'; //ignores the last character: '\n'
 
-    /* if((bsz = read(STDIN_FILENO, buf, BUFSIZE))){
-        memcpy(gamecfg.path, buf, bsz);
-
-        buf[bsz-1] = '\0';
-    } */
-    
     fputs("Launch arguments ( separated by commas ) ( leave empty for none ): ", stdout);
     
     fgets(buf, BUFSIZE, stdin);
@@ -101,33 +73,52 @@ gt_error create(config *cfg, string folder, string game){
 
     gamecfg.scripts.prelaunch = (toupper(getchar()) == 'Y');
 
-    while((c = getchar()) != '\n' && c != EOF); //flushes stdin
+    stdin->_IO_read_ptr = stdin->_IO_read_end; // works better for my needs ( aka using the enter key to skip the rest of the form )
     
     fputs("Postlaunch script ( Y/n ): ", stdout);
 
     gamecfg.scripts.postlaunch = (toupper(getchar()) == 'Y');
 
     if((err = create_game_config(&pgamecfg, gamecfg))){
-        goto out2;
+        goto out;
     }
+
+    fpsz = str_len(&folder) + str_len(&game)+ 12; //5 for game/, 7 for /config
+
+    filepath = str_alloc(fpsz);
+
+    str_append_multiple(&filepath, 3, folder, str_view(5, "game/"), game);
+
+    tmpp = str_raw_p(&filepath); 
+
+    if(can_access(tmpp, S_IFDIR)){
+        err = game_already_exists;
+        goto out;
+    }
+
+    if(!__mkdir(tmpp)){
+        err = failed_to_create_dir;
+        goto out;
+    }
+
+    str_append(&filepath, str_view(7, "/config")); 
 
     if((fd = open(str_raw_p(&filepath), O_CREAT | O_RDWR, FILE_PERM)) == -1){
         err = failed_to_open;
-        goto out2;
+        goto out;
     }
 
     if(write(fd, str_raw_p(&pgamecfg), str_len(&pgamecfg)) <= 0){
         err = failed_to_write;
-        goto out2;
+        goto out;
     }
 
-    out2:
+    out:
     str_free(&pgamecfg);
     free_game_config(&gamecfg);
     close(fd);
 
-    out:
-    str_free(&filepath);
+    str_free(&filepath); 
 
     return err;
 }

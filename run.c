@@ -9,7 +9,7 @@
 #include "run.h"
 #include "utils.h"
 #include "filesys.h"
-#include "parse.h"
+#include "parse.h" 
 
 gt_error find_wine(string*, string, char*);
 
@@ -22,7 +22,7 @@ gt_error run(config* cfg, string folder, string game){
 
     if((err = get_game_config(&gamecfg, &game_folder, folder, game))){
         goto out;
-    }
+    } 
  
     err = run_game(cfg, &gamecfg, game_folder, folder);
 
@@ -214,7 +214,7 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
 
     struct __args *arguments = &gamecfg->arguments, *environment = &gamecfg->environment;
 
-    executable = get_file_from_path(str_view(pathlen, gamecfg->path));
+    executable = get_file_from_path(str_view(pathlen, gamecfg->path)); 
 
     if(gamecfg->wine.version && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
         goto out;

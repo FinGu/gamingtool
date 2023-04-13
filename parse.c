@@ -93,7 +93,7 @@ gt_error create_game_config(string* data, game_config in){
         for(i = 0; i < in.environment.size; ++i){
             inel = cJSON_CreateString(in.environment.ptr[i]);
 
-            cJSON_AddItemToArray(obj, inel) ;
+            cJSON_AddItemToArray(obj, inel);
         }
 
         cJSON_AddItemToObject(config, "environment", obj);
@@ -221,7 +221,7 @@ gt_error parse_game_config(game_config *out, char *data){
             if(!cJSON_IsString(in)){
                 continue;
             }
-
+            
             out->arguments.ptr[i++] = strdup(in->valuestring);
         } 
     }
@@ -240,7 +240,7 @@ gt_error parse_game_config(game_config *out, char *data){
             if(!cJSON_IsString(in)){
                 continue;
             }
-
+            
             out->environment.ptr[i++] = strdup(in->valuestring);
         }
     }
@@ -282,10 +282,16 @@ void free_game_config(game_config *to_free){
         free(to_free->arguments.ptr); 
     }
 
+    if(to_free->environment.split){
+        free_split((__split_out){.size = to_free->environment.size, .ptr = to_free->environment.ptr});
+        return;
+    } 
+
+    for(i = 0; i < to_free->environment.size; ++i){
+        free(to_free->environment.ptr[i]);
+    }
+
     if(to_free->environment.size){
-        for(; i < to_free->environment.size; ++i){
-            free(to_free->environment.ptr[i]);
-        }
         free(to_free->environment.ptr);
     }
 }
