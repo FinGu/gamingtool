@@ -9,3 +9,5 @@ gt_error parse_config(config*, char*); //no free function needed because the str
 gt_error parse_game_config(game_config*, char*);
 
 void free_game_config(game_config*);
+
+void free_config(config *to_free);

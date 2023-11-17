@@ -12,6 +12,7 @@
 #include "list.h"
 #include "info.h"
 #include "utils.h"
+#include "parse.h"
 
 void usage(void);
 
@@ -28,7 +29,7 @@ int main(int argc, char **argv){
     } 
     
     if((err = get_config(&cfg, folder))){
-        goto out;
+        goto out2;
     }
     
     //create folder and config before the usage message
@@ -36,7 +37,7 @@ int main(int argc, char **argv){
     if(argc < 3){
         usage();
 
-        goto out;
+        goto out2;
     }
 
     argp = argv[1];
@@ -65,6 +66,9 @@ int main(int argc, char **argv){
     else{
         usage();
     }
+
+    out2:
+    free_config(&cfg);
 
     out:
     str_free(&folder);

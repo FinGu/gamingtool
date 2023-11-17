@@ -13,16 +13,17 @@
 
 #define PREFIX NAME"> "
 
-typedef struct {
-    bool log; //log game output into files
-    bool debug; //log debugging info and output of scripts to stdout
-} config;
-
 struct __args {
     int split; //has a splitted string been passed
     size_t size;
     char **ptr;
 };
+
+typedef struct {
+    bool log; //log game output into files
+    bool debug; //log debugging info and output of scripts to stdout
+    struct __args environment; // global environment variables
+} config;
 
 struct __game_wine{
     char *version;

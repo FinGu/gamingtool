@@ -89,7 +89,7 @@ char **args_as_argv(struct __args *args, char* process){
     return out;
 }
 
-gt_error prun(char *process, struct __args *args, struct __args *env, char *log_file, bool log_to_stdout) {
+gt_error prun(char *process, struct __args *args, struct __args *global_env, struct __args *game_env, char *log_file, bool log_to_stdout) {
     int sz, last;
     char **inargs, buf[BUFSIZE] = {0};
     gt_error err = ok;
@@ -112,9 +112,15 @@ gt_error prun(char *process, struct __args *args, struct __args *env, char *log_
 
         dup2(spipe[1], STDOUT_FILENO);
 
-        if(env){
-            for(sz = 0; sz < env->size; ++sz){
-                putenv(env->ptr[sz]);
+        if(global_env){
+            for(sz = 0; sz < global_env->size; ++sz){
+                putenv(global_env->ptr[sz]);
+            }
+        }
+
+        if(game_env){
+            for(sz = 0; sz < game_env->size; ++sz){
+                putenv(game_env->ptr[sz]);
             }
         }
 

@@ -38,6 +38,10 @@ gt_error create_config(string* data){
 
     cJSON_AddItemToObject(config, "debug", obj);
 
+    obj = cJSON_CreateArray();
+
+    cJSON_AddItemToObject(config, "environment", obj);
+
     buf = cJSON_Print(config);
 
     if(!buf){
@@ -139,10 +143,11 @@ gt_error create_game_config(string* data, game_config in){
 }
 
 gt_error parse_config(config *out, char *data){
-    cJSON *config, *handle;
+    int sz, i = 0;
+    cJSON *config, *handle, *in;
     gt_error err = ok;
 
-    config = handle = NULL;
+    config = handle = in = NULL;
     
     if((err = create_parser(&config, data))){
         goto out;
@@ -165,6 +170,23 @@ gt_error parse_config(config *out, char *data){
     }
 
     out->debug = handle->valueint;
+
+    handle = cJSON_GetObjectItem(config, "environment");
+
+    sz = cJSON_GetArraySize(handle);
+
+    if(sz){
+        out->environment = (struct __args){0, sz, calloc(sz, sizeof(char*))};
+
+        cJSON_ArrayForEach(in, handle)
+        {
+            if(!cJSON_IsString(in)){
+                continue;
+            }
+            
+            out->environment.ptr[i++] = strdup(in->valuestring);
+        }
+    }
 
     out:
     cJSON_Delete(config);
@@ -286,6 +308,18 @@ void free_game_config(game_config *to_free){
         free_split((__split_out){.size = to_free->environment.size, .ptr = to_free->environment.ptr});
         return;
     } 
+
+    for(i = 0; i < to_free->environment.size; ++i){
+        free(to_free->environment.ptr[i]);
+    }
+
+    if(to_free->environment.size){
+        free(to_free->environment.ptr);
+    }
+}
+
+void free_config(config *to_free){
+    int i;
 
     for(i = 0; i < to_free->environment.size; ++i){
         free(to_free->environment.ptr[i]);

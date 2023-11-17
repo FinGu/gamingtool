@@ -13,7 +13,7 @@
 
 gt_error find_wine(string*, string, char*);
 
-gt_error game_process_run(game_config*, string, char*, bool);
+gt_error game_process_run(config *, game_config*, string, char*, bool);
 
 gt_error run(config* cfg, string folder, string game){
     gt_error err = ok;
@@ -120,7 +120,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         
         tmpp = str_raw_p(&scpath);
 
-        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, &gamecfg->environment, NULL, cfg->debug) : failed_to_execute); 
+        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, &cfg->environment, &gamecfg->environment, NULL, cfg->debug) : failed_to_execute); 
 
         str_clear(&scpath, 9); //clears prelaunch
 
@@ -176,7 +176,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
 
     tmpp = str_raw_p(&logpath);
 
-    err = game_process_run(gamecfg, folder, tmpp, cfg->debug);
+    err = game_process_run(cfg, gamecfg, folder, tmpp, cfg->debug);
 
     if(gamecfg->scripts.postlaunch) {
         if(cfg->debug){
@@ -187,7 +187,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
         
         tmpp = str_raw_p(&scpath);
 
-        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, &gamecfg->environment, NULL, cfg->debug) : failed_to_execute);
+        serr = (can_access(tmpp, S_IXUSR) ? prun(tmpp, NULL, &cfg->environment, &gamecfg->environment, NULL, cfg->debug) : failed_to_execute);
 
         //no need to clear postlaunch
 
@@ -204,7 +204,7 @@ gt_error run_game(config* cfg, game_config *gamecfg, string game_folder, string 
     return err;
 }
 
-gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, bool log_to_stdout){
+gt_error game_process_run(config *cfg, game_config *gamecfg, string folder, char *log_path, bool log_to_stdout){
     gt_error err = ok;
 
     size_t proglen, pathlen = strlen(gamecfg->path), tidx; //4 for the full command, 1 for 0
@@ -212,7 +212,7 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
     char *tmpp;
     string program, executable, winepath = str_alloc(0);
 
-    struct __args *arguments = &gamecfg->arguments, *environment = &gamecfg->environment;
+    struct __args *arguments = &gamecfg->arguments, *game_environment = &gamecfg->environment, *cfg_environment = &cfg->environment;
 
     executable = get_file_from_path(str_view(pathlen, gamecfg->path)); 
 
@@ -239,9 +239,9 @@ gt_error game_process_run(game_config *gamecfg, string folder, char *log_path, b
     if(gamecfg->wine.version){
         arguments->ptr[0] = tmpp; // pass program as an arg to wine
 
-        err = prun(str_raw_p(&winepath), arguments, environment, log_path, log_to_stdout); // run wine
+        err = prun(str_raw_p(&winepath), arguments, cfg_environment, game_environment, log_path, log_to_stdout); // run wine
     } else {
-        err = prun(tmpp, arguments, environment, log_path, log_to_stdout);
+        err = prun(tmpp, arguments, cfg_environment, game_environment, log_path, log_to_stdout);
     }
 
     str_free(&winepath);
