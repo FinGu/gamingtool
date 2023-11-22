@@ -24,8 +24,14 @@ typedef enum {
     failed_to_start,
     //run ends
     //create starts
-    game_already_exists 
+    game_already_exists,
+    wine_not_found,
     //create ends
+    //install starts
+    curl_bad_instance,
+    target_not_found,
+    target_already_exists,
+    //install ends
 
 } gt_error;
 

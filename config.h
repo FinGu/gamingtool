@@ -11,6 +11,10 @@
 
 #define DIRNAME "/." NAME
 
+#define LIBURL "https://media.githubusercontent.com/media/FinGu/gamingtool-library/main/"
+
+#define LUSIZE 72
+
 #define PREFIX NAME"> "
 
 struct __args {

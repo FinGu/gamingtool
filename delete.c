@@ -48,7 +48,7 @@ gt_error delete(config *cfg, string folder, string game){
 
         gamecfg.path[tmpi] = '\0';
 
-        fprintf(stdout, "Are you sure you want to delete the folder %s ? ( Y/n ): ", gamecfg.path);
+        printf("Are you sure you want to delete the folder %s ? ( Y/n ): ", gamecfg.path);
 
         stdin->_IO_read_ptr = stdin->_IO_read_end; 
 

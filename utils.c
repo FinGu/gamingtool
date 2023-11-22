@@ -152,7 +152,7 @@ gt_error prun(char *process, struct __args *args, struct __args *global_env, str
             buf[sz] = '\0';
 
             if(log_to_stdout){
-                fputs(buf, stdout);
+                puts(buf);
             }
 
             if(log_file){
@@ -168,3 +168,59 @@ gt_error prun(char *process, struct __args *args, struct __args *global_env, str
 
     return err;
 }
+
+gt_error find_wine(string *out, string folder, char *wine){ //we don't have the length of wine
+    gt_error err = ok;
+    string cout;
+    size_t wlen, len;
+    char *tmpp;
+
+    if(!wine) {
+        err = couldnt_find_wine;
+        goto out;
+    }
+
+    wlen = strlen(wine);
+
+    len = str_len(&folder) + wlen + 14; //5 for wine/, 9 for /bin/wine
+
+    cout = str_alloc(len);
+
+    // "%swine/%s/"
+    str_append_multiple(&cout, 4, folder, str_view(5, "wine/"), str_view(wlen, wine), str_view(1, "/"));
+
+    tmpp = str_raw_p(&cout);
+
+    if(!can_access(tmpp, S_IFDIR)){
+        err = couldnt_find_wine;
+        goto out;
+    }
+
+    str_append(&cout, str_view(4, "wine"));
+
+    if(can_access(tmpp, S_IXUSR)){
+        goto out;
+    } 
+
+    str_clear(&cout, 4);
+
+    //memset(&cout.ptr[len-8], 0, 4); //clears only wine
+
+    str_append(&cout, str_view(8, "bin/wine"));
+
+    if (can_access(tmpp, S_IXUSR)){
+        goto out;
+    }
+
+    err = couldnt_find_wine;
+
+    out:
+    if(err){
+        str_free(&cout);
+    } else{
+        *out = cout;
+    }
+
+    return err;
+}
+

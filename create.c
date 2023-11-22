@@ -16,14 +16,14 @@ char *__strdup(size_t*, char*);
 gt_error create(config *cfg, string folder, string game){
     int fd = -1;
     size_t fpsz, len = 0;
-    string filepath;
+    string filepath, tmp = {};
     gt_error err = ok;
     char *tmpp, buf[BUFSIZE] = {0};
     string pgamecfg;
     game_config gamecfg = {0}; 
     __split_out spl = {0};
     
-    fputs(PREFIX"Game's path: ", stdout);
+    puts(PREFIX"Game's path: ");
 
     fgets(buf, BUFSIZE, stdin);
 
@@ -31,7 +31,7 @@ gt_error create(config *cfg, string folder, string game){
 
     gamecfg.path[len-1] = '\0'; //ignores the last character: '\n'
 
-    fputs("Launch arguments ( separated by commas ) ( leave empty for none ): ", stdout);
+    puts("Launch arguments ( separated by commas ) ( leave empty for none ): ");
     
     fgets(buf, BUFSIZE, stdin);
 
@@ -45,7 +45,7 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.arguments = (struct __args){.split = 1, .size = spl.size, .ptr = spl.ptr};
     } 
 
-    fputs("Environment variables ( A=b, ...) ( leave empty for none ): ", stdout);
+    puts("Environment variables ( A=b, ...) ( leave empty for none ): ");
     
     fgets(buf, BUFSIZE, stdin);
 
@@ -59,7 +59,7 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.environment = (struct __args){.split = 1, .size = spl.size, .ptr = spl.ptr};
     }
 
-    fputs("Wine version ( leave empty to not use wine ): ", stdout);
+    puts("Wine version ( leave empty to not use wine ): ");
 
     fgets(buf, BUFSIZE, stdin);
 
@@ -69,13 +69,13 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.wine.version[len-1] = '\0';
     }
 
-    fputs("Prelaunch script ( Y/n ): ", stdout);
+    puts("Prelaunch script ( Y/n ): ");
 
     gamecfg.scripts.prelaunch = (toupper(getchar()) == 'Y');
 
     stdin->_IO_read_ptr = stdin->_IO_read_end; // works better for my needs ( aka using the enter key to skip the rest of the form )
     
-    fputs("Postlaunch script ( Y/n ): ", stdout);
+    puts("Postlaunch script ( Y/n ): ");
 
     gamecfg.scripts.postlaunch = (toupper(getchar()) == 'Y');
 
@@ -95,6 +95,13 @@ gt_error create(config *cfg, string folder, string game){
         err = game_already_exists;
         goto out;
     }
+
+    if(find_wine(&tmp, folder, gamecfg.wine.version) != ok){
+        err = wine_not_found;
+        goto out;
+    }
+
+    str_free(&tmp);
 
     if(!__mkdir(tmpp)){
         err = failed_to_create_dir;

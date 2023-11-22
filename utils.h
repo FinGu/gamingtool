@@ -14,3 +14,9 @@ void free_split(__split_out);
 string get_file_from_path(string); 
 
 gt_error prun(char*, struct __args*, struct __args*, struct __args*, char*, bool); 
+
+gt_error download_to_file(char *, char *);
+
+gt_error unpack_file(char *, char *);
+
+gt_error find_wine(string*, string, char*);

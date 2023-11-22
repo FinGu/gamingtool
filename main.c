@@ -7,6 +7,7 @@
 #include "filesys.h"
 
 #include "run.h"
+#include "install.h"
 #include "create.h"
 #include "delete.h"
 #include "list.h"
@@ -60,6 +61,15 @@ int main(int argc, char **argv){
     else if(strcmp(argp, "create") == 0){
         err = create(&cfg, folder, argh);
     }
+    else if(strcmp(argp, "install") == 0){
+        if(argc < 4){
+            usage();
+
+            goto out2;
+        }
+
+        err = install(&cfg, folder, argh, str_view(strlen(argv[3]), argv[3]));
+    }
     else if(strcmp(argp, "delete") == 0){
         err = delete(&cfg, folder, argh);
     }
@@ -87,6 +97,7 @@ void usage(){
         "info <game> ( Shows a config's structure )\n" \
         "list <wine or game> ( Displays all the names of the games/wines )\n" \
         "create <game name> ( Prompts a cli tool to create a game config )\n" \
+        "install <wine or game> <name> ( Installs a wine/game from the github repo )\n" \
         "delete <game> ( Removes a game )"
     );
 }
