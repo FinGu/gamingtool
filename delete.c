@@ -30,7 +30,7 @@ gt_error delete(config *cfg, string folder, string game){
         goto out;
     }
 
-    fputs("Delete game folder ( Y/n ): ", stdout);
+    printf("Delete game folder ( Y/n ): ");
 
     if(toupper(getchar()) == 'Y'){
         game_config gamecfg = {0};
@@ -39,6 +39,10 @@ gt_error delete(config *cfg, string folder, string game){
         if((err = get_game_config(&gamecfg, &game_folder, folder, game))){
             goto free;
         } 
+        
+        if(!can_access(gamecfg.path, S_IWUSR)){
+            goto free;
+        }
 
         int pathlen = strlen(gamecfg.path);
 
