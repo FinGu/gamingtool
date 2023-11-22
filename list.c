@@ -16,7 +16,7 @@ gt_error list(string folder, char *arg){
 
     str_append_multiple(&folderbuf, 2, folder, str_view(strlen(arg), arg));
 
-    puts(PREFIX);
+    printf(PREFIX);
 
     err = print_files_in_folder(str_raw_p(&folderbuf));
 
