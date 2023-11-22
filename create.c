@@ -23,7 +23,7 @@ gt_error create(config *cfg, string folder, string game){
     game_config gamecfg = {0}; 
     __split_out spl = {0};
     
-    puts(PREFIX"Game's path: ");
+    printf(PREFIX"Game's path: ");
 
     fgets(buf, BUFSIZE, stdin);
 
@@ -31,7 +31,7 @@ gt_error create(config *cfg, string folder, string game){
 
     gamecfg.path[len-1] = '\0'; //ignores the last character: '\n'
 
-    puts("Launch arguments ( separated by commas ) ( leave empty for none ): ");
+    printf("Launch arguments ( separated by commas ) ( leave empty for none ): ");
     
     fgets(buf, BUFSIZE, stdin);
 
@@ -45,7 +45,7 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.arguments = (struct __args){.split = 1, .size = spl.size, .ptr = spl.ptr};
     } 
 
-    puts("Environment variables ( A=b, ...) ( leave empty for none ): ");
+    printf("Environment variables ( A=b, ...) ( leave empty for none ): ");
     
     fgets(buf, BUFSIZE, stdin);
 
@@ -59,7 +59,7 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.environment = (struct __args){.split = 1, .size = spl.size, .ptr = spl.ptr};
     }
 
-    puts("Wine version ( leave empty to not use wine ): ");
+    printf("Wine version ( leave empty to not use wine ): ");
 
     fgets(buf, BUFSIZE, stdin);
 
@@ -69,13 +69,13 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.wine.version[len-1] = '\0';
     }
 
-    puts("Prelaunch script ( Y/n ): ");
+    printf("Prelaunch script ( Y/n ): ");
 
     gamecfg.scripts.prelaunch = (toupper(getchar()) == 'Y');
 
     stdin->_IO_read_ptr = stdin->_IO_read_end; // works better for my needs ( aka using the enter key to skip the rest of the form )
     
-    puts("Postlaunch script ( Y/n ): ");
+    printf("Postlaunch script ( Y/n ): ");
 
     gamecfg.scripts.postlaunch = (toupper(getchar()) == 'Y');
 
