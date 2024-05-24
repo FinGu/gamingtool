@@ -43,7 +43,7 @@ gt_error print_files_in_folder(char *folder){
         } 
 
         if(!first_entry){
-            printf(",");
+            printf(", ");
         }
 
         printf("%s", dd->d_name);
