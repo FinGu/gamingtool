@@ -1,3 +1,4 @@
+#include "errors.h"
 #include <stdio.h>
 
 #include "config.h"
@@ -23,7 +24,7 @@ void print_error(gt_error error){
         {couldnt_find_wine, "Couldn't find the wine version"},
         {failed_to_start, "Failed to start process"},
         {game_already_exists, "Game already exists"},
-        {wine_not_found, "Wine version not found, try running gamingtool install wine <version>"},
+        {wine_not_found, "Wine version not found"},
         {curl_bad_instance, "Could not instantiate libcurl"},
         {target_not_found, "Install target wasn't found, check the available packages at https://github.com/fingu/gamingtool-library"},
         {target_already_exists, "Wine or game already exists"},

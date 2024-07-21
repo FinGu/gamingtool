@@ -7,9 +7,13 @@
 #include <stdlib.h>
 
 #include "create.h"
+#include "errors.h"
 #include "filesys.h"
 #include "parse.h"
 #include "utils.h"
+#include "list.h"
+
+gt_error reask_for_wine(game_config *, string, char *, size_t);
 
 char *__strdup(size_t*, char*);
 
@@ -67,7 +71,18 @@ gt_error create(config *cfg, string folder, string game){
         gamecfg.wine.version = __strdup(&len, buf);
 
         gamecfg.wine.version[len-1] = '\0';
+
+        if(find_wine(&tmp, folder, gamecfg.wine.version) != ok){
+            free(gamecfg.wine.version);
+            gamecfg.wine.version = NULL;
+
+            if((err = reask_for_wine(&gamecfg, folder, buf, BUFSIZE))){
+                goto out2;
+            }
+        }
     }
+
+    str_free(&tmp);
 
     printf("Prelaunch script ( Y/n ): ");
 
@@ -96,13 +111,6 @@ gt_error create(config *cfg, string folder, string game){
         goto out;
     }
 
-    if(find_wine(&tmp, folder, gamecfg.wine.version) != ok){
-        err = wine_not_found;
-        goto out;
-    }
-
-    str_free(&tmp);
-
     if(!__mkdir(tmpp)){
         err = failed_to_create_dir;
         goto out;
@@ -122,10 +130,11 @@ gt_error create(config *cfg, string folder, string game){
 
     out:
     str_free(&pgamecfg);
+    str_free(&filepath); 
+
+    out2:
     free_game_config(&gamecfg);
     close(fd);
-
-    str_free(&filepath); 
 
     return err;
 }
@@ -143,4 +152,35 @@ char *__strdup(size_t *ln, char *in){
     *ln = len; 
 
     return ptr;
+}
+
+gt_error reask_for_wine(game_config *gamecfg, string folder, char *buf, size_t buf_size){
+    string tmp;
+
+    size_t len = 0;
+    gt_error err = ok; 
+
+    printf("Wine version not found\nAvailable versions are: ");
+
+    list(folder, "wine", false); 
+
+    printf("Try again: ");
+
+    fgets(buf, buf_size, stdin);
+
+    if(*buf == '\n'){
+        return err;
+    }
+
+    gamecfg->wine.version = __strdup(&len, buf);
+
+    gamecfg->wine.version[len-1] = '\0';
+
+    if(find_wine(&tmp, folder, gamecfg->wine.version) != ok){
+        err = wine_not_found;
+    } else{
+        str_free(&tmp);
+    }
+    
+    return err;
 }

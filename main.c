@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 #include <fcntl.h>
 
 #include "filesys.h"
 
 #include "run.h"
+#include "wine-run.h"
 #include "install.h"
 #include "create.h"
 #include "delete.h"
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
         tmpp = str_raw_p(&argh);
 
         err = ((strcmp(tmpp, "wine") == 0 || strcmp(tmpp, "game") == 0) 
-                ? list(folder, tmpp) 
+                ? list(folder, tmpp, true) 
                 : invalid_input);
     } 
     else if(strcmp(argp, "create") == 0){
@@ -69,6 +69,15 @@ int main(int argc, char **argv){
         }
 
         err = install(&cfg, folder, argh, str_view(strlen(argv[3]), argv[3]));
+    }
+    else if(strcmp(argp, "wine-run") == 0){
+        if(argc < 4){
+            usage();
+
+            goto out2;
+        }
+        
+        err = wine_run(&cfg, folder, argh, argv[3]);
     }
     else if(strcmp(argp, "delete") == 0){
         err = delete(&cfg, folder, argh);
@@ -94,6 +103,7 @@ void usage(){
     puts(
         PREFIX "available options:\n" \
         "run <game> ( Runs a game )\n" \
+        "wine-run <wine version> <windows exe path> ( runs an exe with the version specified )\n" \
         "info <game> ( Shows a config's structure )\n" \
         "list <wine or game> ( Displays all the names of the games/wines )\n" \
         "create <game name> ( Prompts a cli tool to create a game config )\n" \

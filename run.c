@@ -7,11 +7,10 @@
 #include <sys/stat.h>
 
 #include "run.h"
+#include "errors.h"
 #include "utils.h"
 #include "filesys.h"
 #include "parse.h" 
-
-gt_error game_process_run(config *, game_config*, string, char*, bool);
 
 gt_error run(config* cfg, string folder, string game){
     gt_error err = ok;
@@ -160,6 +159,7 @@ gt_error game_process_run(config *cfg, game_config *gamecfg, string folder, char
     executable = get_file_from_path(str_view(pathlen, gamecfg->path)); 
 
     if(gamecfg->wine.version && (err = find_wine(&winepath, folder, gamecfg->wine.version))){
+        err = wine_not_found;
         goto out;
     }
     
