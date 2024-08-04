@@ -12,7 +12,7 @@
 gt_error wine_run(config *cfg, string folder, string version, char *game_path){
     gt_error err = ok;
         
-    if(!can_access(game_path, S_IXUSR)){
+    if(!can_access(game_path, 0)){
         err = game_not_found;
         goto out;
     }
