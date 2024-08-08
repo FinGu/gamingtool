@@ -47,9 +47,9 @@ void free_split(__split_out in){
 
 string get_file_from_path(string in){
     size_t i, len = str_len(&in);
-    char *ptr = NULL;
     string out = str_alloc(0);
     char *tmpp = str_raw_p(&in);
+    char *ptr = tmpp;
 
     for(i = 0; i < len; i++){
         if(in.ptr[i] == '/'){
