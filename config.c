@@ -53,16 +53,42 @@ gt_error get_config(config *in, string folder){
     return err;
 }
 
-gt_error get_game_config(game_config* in, string* game_folder, string folder, string game){
+gt_error get_game_paths(string *game_folder_path, string *game_config_path, string folder, string game){
     gt_error err = ok;
-    char buf[BUFSIZE] = {0}; 
-    string __game_folder = str_alloc(0);
 
-    if((err = get_game_folder(&__game_folder, folder, game))){
+    string game_folder = str_alloc(0);
+
+    size_t nlen;
+
+    if((err = get_game_folder(&game_folder, folder, game))){
         goto out;
     }
 
-    if((err = read_config(BUFSIZE, buf, __game_folder))){
+    nlen = str_len(&game_folder);
+
+    string path = str_alloc(nlen + 6);
+
+    str_append_multiple(&path, 2, game_folder, str_view(6, "config"));
+
+    *game_folder_path = game_folder;
+
+    *game_config_path = path;
+
+out:
+    return err;
+}
+
+gt_error get_game_config(game_config* in, string* game_folder, string folder, string game){
+    gt_error err = ok;
+    char buf[BUFSIZE] = {0}; 
+    string game_folder_path = str_alloc(0);
+    string game_config_path = str_alloc(0);
+
+    if((err = get_game_paths(&game_folder_path, &game_config_path, folder, game))){
+        goto out;
+    }
+
+    if((err = read_file(BUFSIZE, buf, game_config_path))){
         goto out;
     }
 
@@ -72,11 +98,13 @@ gt_error get_game_config(game_config* in, string* game_folder, string folder, st
 
     in->name = strdup(str_raw_p(&game));
 
-    *game_folder = __game_folder;
+    *game_folder = game_folder_path;
     
     out:
+    str_free(&game_config_path);
+
     if(err){
-        str_free(&__game_folder);
+        str_free(&game_folder_path);
     }
 
     return err;

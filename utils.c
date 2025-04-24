@@ -156,7 +156,7 @@ gt_error prun(char *process, struct __args *args, struct __args *global_env, str
             }
 
             if(log_file){
-                write(fd, buf, sz); // should be buffered
+                (void)write(fd, buf, sz); // should be buffered
             }
         }
 

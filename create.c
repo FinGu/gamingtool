@@ -29,7 +29,7 @@ gt_error create(config *cfg, string folder, string game){
     
     printf(PREFIX"Game's path: ");
 
-    fgets(buf, BUFSIZE, stdin);
+    (void)fgets(buf, BUFSIZE, stdin);
 
     gamecfg.path = __strdup(&len, buf);
 
@@ -37,7 +37,7 @@ gt_error create(config *cfg, string folder, string game){
 
     printf("Launch arguments ( separated by commas ) ( leave empty for none ): ");
     
-    fgets(buf, BUFSIZE, stdin);
+    (void)fgets(buf, BUFSIZE, stdin);
 
     if(*buf != '\n'){
         len = strlen(buf);
@@ -51,7 +51,7 @@ gt_error create(config *cfg, string folder, string game){
 
     printf("Environment variables ( A=b, ...) ( leave empty for none ): ");
     
-    fgets(buf, BUFSIZE, stdin);
+    (void)fgets(buf, BUFSIZE, stdin);
 
     if(*buf != '\n'){
         len = strlen(buf);
@@ -65,7 +65,7 @@ gt_error create(config *cfg, string folder, string game){
 
     printf("Wine version ( leave empty to not use wine ): ");
 
-    fgets(buf, BUFSIZE, stdin);
+    (void)fgets(buf, BUFSIZE, stdin);
 
     if(*buf != '\n'){
         gamecfg.wine.version = __strdup(&len, buf);
@@ -166,7 +166,7 @@ gt_error reask_for_wine(game_config *gamecfg, string folder, char *buf, size_t b
 
     printf("Try again: ");
 
-    fgets(buf, buf_size, stdin);
+    (void)fgets(buf, buf_size, stdin);
 
     if(*buf == '\n'){
         return err;

@@ -167,7 +167,7 @@ gt_error game_process_run(config *cfg, game_config *gamecfg, string folder, char
 
     gamecfg->path[tidx] = '\0'; // sets the last slash to a 0 to get the folder path without the executable
 
-    chdir(gamecfg->path);
+    (void)chdir(gamecfg->path);
 
     gamecfg->path[tidx] = '/'; // sets the original value back, for debugging purposes
 

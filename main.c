@@ -7,6 +7,7 @@
 
 #include "run.h"
 #include "wine-run.h"
+#include "edit.h"
 #include "install.h"
 #include "create.h"
 #include "delete.h"
@@ -61,6 +62,9 @@ int main(int argc, char **argv){
     else if(strcmp(argp, "create") == 0){
         err = create(&cfg, folder, argh);
     }
+    else if(strcmp(argp, "edit") == 0){
+        err = edit(&cfg, folder, argh);
+    }
     else if(strcmp(argp, "install") == 0){
         if(argc < 4){
             usage();
@@ -70,7 +74,7 @@ int main(int argc, char **argv){
 
         err = install(&cfg, folder, argh, str_view(strlen(argv[3]), argv[3]));
     }
-    else if(strcmp(argp, "wine-run") == 0){
+    else if(strcmp(argp, "wine-run") == 0 || strcmp(argp, "run-wine") == 0){
         if(argc < 4){
             usage();
 
@@ -105,6 +109,7 @@ void usage(){
         "run <game> ( Runs a game )\n" \
         "wine-run <wine version> <windows exe path> ( runs an exe with the version specified )\n" \
         "info <game> ( Shows a config's structure )\n" \
+        "edit <game> ( Edit a config using $EDITOR )\n" \
         "list <wine or game> ( Displays all the names of the games/wines )\n" \
         "create <game name> ( Prompts a cli tool to create a game config )\n" \
         "install <wine or game> <name> ( Installs a wine/game from the github repo )\n" \

@@ -49,6 +49,8 @@ typedef struct {
     struct __game_scripts scripts;
 } game_config;
 
+gt_error get_game_paths(string *, string *, string, string);
+
 gt_error get_config(config*, string);
 
 gt_error get_game_config(game_config*, string*, string, string);

@@ -120,16 +120,11 @@ out:
     return err;
 }
 
-gt_error read_config(size_t bufsize, char *buf, string folder){ 
+gt_error read_file(size_t bufsize, char *buf, string file_to_read){ 
     int fd;
     gt_error err = ok;
-    size_t nlen = str_len(&folder) + 6; //6 for config
 
-    string location = str_alloc(nlen);
-
-    str_append_multiple(&location, 2, folder, str_view(6, "config"));
-
-    fd = open(str_raw_p(&location), O_RDONLY, FILE_PERM);
+    fd = open(str_raw_p(&file_to_read), O_RDONLY, FILE_PERM);
     
     if(fd == -1){
         err = failed_to_open;
@@ -144,7 +139,6 @@ gt_error read_config(size_t bufsize, char *buf, string folder){
     buf[bufsize-1] = '\0';
 
     out:
-    str_free(&location);
     close(fd);
 
     return err; 
