@@ -43,10 +43,9 @@ gt_error get_config(config *in, string folder){
         buf[BUFSIZE-1] = '\0';
     }
 
-    err = parse_config(in, ((tmpp) ? tmpp : buf));
+    err = parse_config(in, location, ((tmpp) ? tmpp : buf));
     
     out:
-    str_free(&location);
     str_free(&cfg);
     close(fd);
 

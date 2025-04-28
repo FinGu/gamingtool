@@ -36,13 +36,18 @@ int main(int argc, char **argv){
     
     //create folder and config before the usage message
 
+    argp = argv[1];
+
     if(argc < 3){
+        if(argc == 2 && strcmp(argp, "edit") == 0){
+            err = edit_main(&cfg);
+            goto out2;
+        }
+
         usage();
 
         goto out2;
     }
-
-    argp = argv[1];
 
     argh = str_view(strlen(argv[2]), argv[2]);
 
@@ -63,7 +68,7 @@ int main(int argc, char **argv){
         err = create(&cfg, folder, argh);
     }
     else if(strcmp(argp, "edit") == 0){
-        err = edit(&cfg, folder, argh);
+        err = edit_game(&cfg, folder, argh);
     }
     else if(strcmp(argp, "install") == 0){
         if(argc < 4){

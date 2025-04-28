@@ -142,12 +142,14 @@ gt_error create_game_config(string* data, game_config in){
     return err;
 }
 
-gt_error parse_config(config *out, char *data){
+gt_error parse_config(config *out, string path, char *data){
     int sz, i = 0;
     cJSON *config, *handle, *in;
     gt_error err = ok;
 
     config = handle = in = NULL;
+
+    out->path = path;
     
     if((err = create_parser(&config, data))){
         goto out;
@@ -194,7 +196,6 @@ gt_error parse_config(config *out, char *data){
     return err;
 }
 
-//messy
 gt_error parse_game_config(game_config *out, char *data){
     gt_error err = ok;
     cJSON *config, *handle, *in;
@@ -328,4 +329,6 @@ void free_config(config *to_free){
     if(to_free->environment.size){
         free(to_free->environment.ptr);
     }
+
+    str_free(&to_free->path);
 }

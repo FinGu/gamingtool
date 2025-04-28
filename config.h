@@ -27,6 +27,7 @@ typedef struct {
     bool log; //log game output into files
     bool debug; //log debugging info and output of scripts to stdout
     struct __args environment; // global environment variables
+    string path;
 } config;
 
 struct __game_wine{

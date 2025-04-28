@@ -1,3 +1,5 @@
 #include "config.h"
 
-gt_error edit(config *cfg, string, string);
+gt_error edit_main(config *cfg);
+
+gt_error edit_game(config *cfg, string, string);
